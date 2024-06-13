@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "828630352112",
+    "project_id": "lazarus-d797f",
+    "storage_bucket": "lazarus-d797f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828630352112:android:89836e090ecd13d3a14235",
+        "android_client_info": {
+          "package_name": "com.mcleodsolutions.lazarus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0IctVNBtGo5lDxKrrMAwqpTLauMqn8BM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828630352112:android:7afb3c58711136c3a14235",
+        "android_client_info": {
+          "package_name": "com.mcleodsolutions.lazarusjobtracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0IctVNBtGo5lDxKrrMAwqpTLauMqn8BM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
