@@ -7,6 +7,7 @@ import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 import 'package:provider/provider.dart';
 import 'src/views/auth/auth_view_model.dart';
+import 'package:lazarus_job_tracker/src/services/material_service.dart';
 
 
 void main() async {
@@ -34,6 +35,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        Provider<MaterialService>(create: (_) => MaterialService()),
       ],
       child: MyApp(settingsController: settingsController),
     ),
