@@ -17,6 +17,13 @@ class AuthViewModel with ChangeNotifier {
     });
   }
 
+  
+  set user(User? user) {
+    _user = user;
+    notifyListeners(); // Notify listeners on user state change
+  }
+  
+
   Future<void> signIn(String email, String password) async {
     await _authService.signInWithEmailPassword(email, password);
     notifyListeners();

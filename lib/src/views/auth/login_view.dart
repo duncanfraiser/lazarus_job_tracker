@@ -36,7 +36,7 @@ class LoginView extends StatelessWidget {
                   Navigator.pushReplacementNamed(context, '/');
                 } else {
                   // Handle login error
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Failed to login'),
                   ));
                 }

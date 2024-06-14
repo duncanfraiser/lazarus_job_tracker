@@ -6,7 +6,6 @@ import 'package:lazarus_job_tracker/src/views/home/home_view.dart';
 import 'package:provider/provider.dart';
 
 import 'sample_feature/sample_item_details_view.dart';
-import 'sample_feature/sample_item_list_view.dart';
 import 'settings/settings_controller.dart';
 import 'settings/settings_view.dart';
 
@@ -57,7 +56,7 @@ class MyApp extends StatelessWidget {
           
           // Define named routes
           routes: {
-            '/': (context) => HomeView(),
+            '/': (context) => const HomeView(),
             '/login': (context) => LoginView(),
             '/signup': (context) => SignupView(),
             SettingsView.routeName: (context) => SettingsView(controller: settingsController),
