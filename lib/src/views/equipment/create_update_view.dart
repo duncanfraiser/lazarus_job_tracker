@@ -5,7 +5,7 @@ import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 class CreateUpdateView extends StatefulWidget {
   final Equipment? equipment; // If null, it means we're creating a new equipment
 
-  CreateUpdateView({this.equipment});
+  const CreateUpdateView({super.key, this.equipment});
 
   @override
   _CreateUpdateViewState createState() => _CreateUpdateViewState();
@@ -13,7 +13,7 @@ class CreateUpdateView extends StatefulWidget {
 
 class _CreateUpdateViewState extends State<CreateUpdateView> {
   final _formKey = GlobalKey<FormState>();
-  final EquipmentService _equipmentService = EquipmentService();
+  final ClientService _equipmentService = ClientService();
 
   late TextEditingController _nameController;
   late TextEditingController _priceController;
@@ -116,7 +116,7 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
             children: <Widget>[
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
+                decoration: const InputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a name';
@@ -126,7 +126,7 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
               ),
               TextFormField(
                 controller: _priceController,
-                decoration: InputDecoration(labelText: 'Price'),
+                decoration: const InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -140,7 +140,7 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
               ),
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a description';
@@ -148,7 +148,7 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
                 child: Text(widget.equipment == null ? 'Create' : 'Update'),

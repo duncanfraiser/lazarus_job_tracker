@@ -1,60 +1,65 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
-import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
-import 'package:lazarus_job_tracker/src/views/equipment/create_update_view.dart';
+import 'package:lazarus_job_tracker/src/models/client_model.dart';
+import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:lazarus_job_tracker/src/views/client/client_create_update_view.dart';
 
 
-class EquipmentListView extends StatefulWidget {
-  const EquipmentListView({super.key});
+class ClientListView extends StatefulWidget {
+  const ClientListView({super.key});
 
   @override
-  _EquipmentListViewState createState() => _EquipmentListViewState();
+  _ClientListViewState createState() => _ClientListViewState();
 }
 
-class _EquipmentListViewState extends State<EquipmentListView> {
-  final ClientService _equipmentService = ClientService();
+class _ClientListViewState extends State<ClientListView> {
+  final ClientService _clientService = ClientService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Equipment'),
+        title: const Text('Clients'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateUpdateView()),
+                MaterialPageRoute(builder: (context) => const ClientCreateUpdateView()),
               ).then((value) => setState(() {})); // Refresh list after returning
             },
           ),
         ],
       ),
-      body: FutureBuilder<List<Equipment>>(
-        future: _equipmentService.getAllEquipment(),
+      body: FutureBuilder<List<Client>>(
+        future: _clientService.getAllClient(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No equipment found'));
+            return const Center(child: Text('No client found'));
           } else {
-            final equipmentList = snapshot.data!;
+            final clientList = snapshot.data!;
             return ListView.builder(
-              itemCount: equipmentList.length,
+              itemCount: clientList.length,
               itemBuilder: (context, index) {
-                final equipment = equipmentList[index];
+                final client = clientList[index];
                 return ListTile(
-                  title: Text(equipment.name),
-                  subtitle: Text(equipment.description),
-                  trailing: Text('\$${equipment.price.toStringAsFixed(2)}'),
+                  title: Text('${client.fName} ${client.lName}'),
+                   trailing: InkWell(
+                    child: Text(
+                      client.phone,
+                      style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                    ),
+                    
+                   ),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CreateUpdateView(equipment: equipment),
+                        builder: (context) => ClientCreateUpdateView(client: client),
                       ),
                     ).then((value) => setState(() {})); // Refresh list after returning
                   },
@@ -63,8 +68,8 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                     bool? confirmDelete = await showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Delete Equipment'),
-                        content: const Text('Are you sure you want to delete this equipment?'),
+                        title: const Text('Delete Client'),
+                        content: const Text('Are you sure you want to delete this Client?'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
@@ -79,7 +84,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                     );
 
                     if (confirmDelete == true) {
-                      await _equipmentService.deleteEquipment(equipment.documentId!);
+                      await _clientService.deleteClient(client.documentId!);
                       setState(() {});
                     }
                   },

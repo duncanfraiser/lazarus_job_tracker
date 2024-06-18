@@ -1,4 +1,3 @@
-
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -6,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/services/auth_service.dart';
 import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
 
-//Imports for equipment navigation
-import 'package:lazarus_job_tracker/src/views/equipment/create_update_view.dart';
+//Imports for list views navigation
+import 'package:lazarus_job_tracker/src/views/client/client_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_list_view.dart';
 
 
@@ -21,7 +20,7 @@ class HomeView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text('Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -33,22 +32,51 @@ class HomeView extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Welcome to the Home Page!'),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EquipmentListView()),
+           body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Calculate the width as a percentage of the available width
+                double buttonWidth = constraints.maxWidth * 0.7; // 80% of the screen width
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ClientListView()),
+                          );
+                        },
+                        child: const Text('Clients'),
+                      ),
+                    ),
+                    SizedBox(height: 15), // Add some spacing between buttons
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const EquipmentListView()),
+                          );
+                        },
+                        child: const Text('Equipment'),
+                      ),
+                    ),
+                    // Add more buttons here if needed
+                  ],
                 );
               },
-              child: const Text('Go to Equipment List'),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 
-class EquipmentService {
+class ClientService {
   final CollectionReference _equipmentCollection = FirebaseFirestore.instance.collection('equipment');
 
   // Add Equipment
