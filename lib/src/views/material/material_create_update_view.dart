@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
-import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
+import 'package:lazarus_job_tracker/src/models/material_model.dart';
+import 'package:lazarus_job_tracker/src/services/material_service.dart';
 
-class CreateUpdateView extends StatefulWidget {
-  final Equipment? equipment; // If null, it means we're creating a new equipment
+class MaterialCreateUpdateView extends StatefulWidget {
+  final MaterialModel? material; // If null, it means we're creating a new Material
 
-  const CreateUpdateView({super.key, this.equipment});
+  const MaterialCreateUpdateView({super.key, this.material});
 
   @override
-  _CreateUpdateViewState createState() => _CreateUpdateViewState();
+  _MaterialCreateUpdateViewState createState() => _MaterialCreateUpdateViewState();
 }
 
-class _CreateUpdateViewState extends State<CreateUpdateView> {
+class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
   final _formKey = GlobalKey<FormState>();
-  final EquipmentService _equipmentService = EquipmentService();
+  final MaterialService _materialService = MaterialService();
 
   late TextEditingController _nameController;
   late TextEditingController _priceController;
@@ -22,9 +22,9 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.equipment?.name ?? '');
-    _priceController = TextEditingController(text: widget.equipment?.price.toString() ?? '');
-    _descriptionController = TextEditingController(text: widget.equipment?.description ?? '');
+    _nameController = TextEditingController(text: widget.material?.name ?? '');
+    _priceController = TextEditingController(text: widget.material?.price.toString() ?? '');
+    _descriptionController = TextEditingController(text: widget.material?.description ?? '');
   }
 
   @override
@@ -42,17 +42,17 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
         final price = double.parse(_priceController.text);
         final description = _descriptionController.text;
 
-        if (widget.equipment == null) {
-          // Create new equipment
-          await _equipmentService.addEquipment(Equipment(
+        if (widget.material == null) {
+          // Create new Material
+          await _materialService.addMaterial(MaterialModel(
             name: name,
             price: price,
             description: description,
           ));
         } else {
-          // Update existing equipment
-          await _equipmentService.updateEquipment(Equipment(
-            documentId: widget.equipment!.documentId,
+          // Update existing Material
+          await _materialService.updateMaterial(MaterialModel(
+            documentId: widget.material!.documentId,
             name: name,
             price: price,
             description: description,
@@ -68,13 +68,13 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
     }
   }
 
-  void _deleteEquipment() async {
-    if (widget.equipment != null && widget.equipment!.documentId != null) {
+  void _deleteMaterial() async {
+    if (widget.material != null && widget.material!.documentId != null) {
       bool? confirmDelete = await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Delete Equipment'),
-          content: const Text('Are you sure you want to delete this equipment?'),
+          title: const Text('Delete Material'),
+          content: const Text('Are you sure you want to delete this Material?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -89,7 +89,7 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
       );
 
       if (confirmDelete == true) {
-        await _equipmentService.deleteEquipment(widget.equipment!.documentId!);
+        await _materialService.deleteMaterial(widget.material!.documentId!);
         Navigator.pop(context); // Close the form after deletion
       }
     }
@@ -99,12 +99,12 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.equipment == null ? 'Create Equipment' : 'Update Equipment'),
+        title: Text(widget.material == null ? 'Create Material' : 'Update Material'),
         actions: [
-          if (widget.equipment != null) // Show delete button only for existing equipment
+          if (widget.material != null) // Show delete button only for existing Material
             IconButton(
               icon: const Icon(Icons.delete),
-              onPressed: _deleteEquipment,
+              onPressed: _deleteMaterial,
             ),
         ],
       ),
@@ -151,7 +151,7 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: Text(widget.equipment == null ? 'Create' : 'Update'),
+                child: Text(widget.material == null ? 'Create' : 'Update'),
               ),
             ],
           ),

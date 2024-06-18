@@ -8,7 +8,7 @@ import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
 //Imports for list views navigation
 import 'package:lazarus_job_tracker/src/views/client/client_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_list_view.dart';
-
+import 'package:lazarus_job_tracker/src/views/material/material_list_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -57,7 +57,7 @@ class HomeView extends StatelessWidget {
                         child: const Text('Clients'),
                       ),
                     ),
-                    SizedBox(height: 15), // Add some spacing between buttons
+                    const SizedBox(height: 15), // Add some spacing between buttons
                     SizedBox(
                       width: buttonWidth,
                       height: 50,
@@ -70,7 +70,21 @@ class HomeView extends StatelessWidget {
                         },
                         child: const Text('Equipment'),
                       ),
-                    ),                    // Add more buttons here if needed
+                    ),     
+                    const SizedBox(height: 15), // Add some spacing between buttons
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MaterialListView()),
+                          );
+                        },
+                        child: const Text('Material'),
+                      ),
+                    ),               // Add more buttons here if needed
                   ],
                 );
               },
@@ -81,28 +95,3 @@ class HomeView extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-//       body: const Center(
-//         child: Text('Welcome to the Home Page!'),
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: () {
-//           Navigator.push(
-//             context,
-//             MaterialPageRoute(builder: (context) => CreateUpdateView()), // Navigate to CreateUpdateView
-//           );
-//         },
-//         child: const Icon(Icons.add),
-//         tooltip: 'Add Equipment',
-//       ),
-//     );
-//   }
-// }
