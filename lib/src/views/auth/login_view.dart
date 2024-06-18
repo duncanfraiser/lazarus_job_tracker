@@ -1,12 +1,12 @@
-// lib/src/views/auth/login_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
+import 'package:lazarus_job_tracker/src/views/auth/signup_view.dart';
 import 'package:provider/provider.dart';
 
 class LoginView extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final ValueNotifier<bool> _isLoading = ValueNotifier(false);
 
   LoginView({super.key});
 
@@ -29,20 +29,39 @@ class LoginView extends StatelessWidget {
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            ElevatedButton(
-              onPressed: () async {
-                await authViewModel.signIn(_emailController.text, _passwordController.text);
-                if (authViewModel.user != null) {
-                  Navigator.pushReplacementNamed(context, '/');
+            ValueListenableBuilder<bool>(
+              valueListenable: _isLoading,
+              builder: (context, isLoading, child) {
+                if (isLoading) {
+                  return const CircularProgressIndicator();
                 } else {
-                  // Handle login error
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Failed to login'),
-                  ));
+                  return ElevatedButton(
+                    onPressed: () async {
+                      _isLoading.value = true;
+                      await authViewModel.signIn(_emailController.text, _passwordController.text);
+                      _isLoading.value = false;
+                      if (authViewModel.user != null) {
+                        Navigator.pushReplacementNamed(context, '/');
+                      } else {
+                        // Handle login error
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Failed to login'),
+                        ));
+                      }
+                    },
+                    child: const Text('Login'),
+                  );
                 }
-
               },
-              child: const Text('Login'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignupView()),
+                );
+              },
+              child: const Text('Register'),
             ),
           ],
         ),

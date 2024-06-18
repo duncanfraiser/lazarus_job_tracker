@@ -71,6 +71,7 @@ class HomeView extends StatelessWidget {
                         child: const Text('Equipment'),
                       ),
                     ),
+                    
                     // Add more buttons here if needed
                   ],
                 );
