@@ -21,6 +21,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   late TextEditingController _nameController;
   late TextEditingController _instructionsController;
   List<String> _selectedEquipmentIds = [];
+  final Map<String, String> _equipmentIdToName = {}; 
 
   @override
   void initState() {
@@ -35,6 +36,18 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _nameController.dispose();
     _instructionsController.dispose();
     super.dispose();
+  }
+
+    void _loadSelectedEquipmentNames() async {
+    if (_selectedEquipmentIds.isNotEmpty) {
+      final equipmentService = Provider.of<EquipmentService>(context, listen: false);
+      for (var id in _selectedEquipmentIds) {
+        final equipment = await equipmentService.getEquipmentById(id);
+        setState(() {
+          _equipmentIdToName[id] = equipment!.name;
+        });
+      }
+    }
   }
 
   void _submitForm() async {
@@ -98,9 +111,9 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   }
 
  Future<void> _addNewEquipment(BuildContext context, EquipmentService equipmentService) async {
-    final _newEquipmentNameController = TextEditingController();
-    final _newEquipmentDescriptionController = TextEditingController();
-    final _newEquipmentPriceController = TextEditingController();
+    final newEquipmentNameController = TextEditingController();
+    final newEquipmentDescriptionController = TextEditingController();
+    final newEquipmentPriceController = TextEditingController();
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -109,11 +122,11 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              controller: _newEquipmentNameController,
+              controller: newEquipmentNameController,
               decoration: const InputDecoration(labelText: 'Equipment Name'),
             ),
             TextFormField(
-              controller: _newEquipmentPriceController,
+              controller: newEquipmentPriceController,
               decoration: const InputDecoration(labelText: 'Price'),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -127,7 +140,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
               },
             ),
             TextFormField(
-              controller: _newEquipmentDescriptionController,
+              controller: newEquipmentDescriptionController,
               decoration: const InputDecoration(labelText: 'Equipment Description'),
             ),
           ],
@@ -139,15 +152,20 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
           ),
           TextButton(
             onPressed: () async {
-              final name = _newEquipmentNameController.text;
-              final description = _newEquipmentDescriptionController.text;
+              final name = newEquipmentNameController.text;
+              final description = newEquipmentDescriptionController.text;
               if (name.isNotEmpty && description.isNotEmpty) {
                 final newEquipment = EquipmentModel(
                   documentId: '', // Firebase will generate this automatically
                   name: name,
-                  description: description, price: 0.0,
+                  description: description, 
+                  price: 0.0,
                 );
-                await equipmentService.addEquipment(newEquipment);
+                final docRef = await equipmentService.addEquipment(newEquipment);
+                setState(() {
+                  _selectedEquipmentIds.add(docRef.id);
+                  _equipmentIdToName[docRef.id] = name;
+                });
                 Navigator.of(context).pop();
               }
             },
@@ -158,7 +176,14 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     );
   }
 
-
+  Future<void> _selectEquipment(String id, EquipmentService equipmentService) async {
+    final equipment = await equipmentService.getEquipmentById(id);
+    setState(() {
+      _selectedEquipmentIds.add(id);
+      _equipmentIdToName[id] = equipment!.name;
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     final equipmentService = Provider.of<EquipmentService>(context);
@@ -174,7 +199,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             ),
         ],
       ),
-      body: Padding(
+     body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -219,9 +244,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                         }).toList(),
                         onChanged: (value) {
                           if (value != null && !_selectedEquipmentIds.contains(value)) {
-                            setState(() {
-                              _selectedEquipmentIds.add(value);
-                            });
+                            _selectEquipment(value, equipmentService);
                           }
                         },
                       ),
@@ -237,12 +260,13 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                 },
               ),
               Wrap(
-                children: _selectedEquipmentIds.map((name) {
+                children: _selectedEquipmentIds.map((id) {
                   return Chip(
-                    label: Text(name),
+                    label: Text(_equipmentIdToName[id] ?? 'Loading...'),
                     onDeleted: () {
                       setState(() {
-                        _selectedEquipmentIds.remove(name);
+                        _selectedEquipmentIds.remove(id);
+                        _equipmentIdToName.remove(id);
                       });
                     },
                   );

@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 
 class JobService {
-  final CollectionReference _JobCollection = FirebaseFirestore.instance.collection('job');
+  final CollectionReference jobCollection = FirebaseFirestore.instance.collection('job');
 
   // Add Client
   Future<void> addJob(JobModel job) async {
     try {
-      await _JobCollection.add(job.toJson());
+      await jobCollection.add(job.toJson());
     } catch (e) {
       throw Exception('Error adding job: $e');
     }
@@ -16,7 +16,7 @@ class JobService {
   // Get Client by ID
   Future<JobModel?> getJobById(String id) async {
     try {
-      DocumentSnapshot doc = await _JobCollection.doc(id).get();
+      DocumentSnapshot doc = await jobCollection.doc(id).get();
       if (doc.exists) {
         return JobModel.fromDocument(doc);
       }
@@ -29,7 +29,7 @@ class JobService {
   // Get All Client
   Future<List<JobModel>> getAllJob() async {
     try {
-      QuerySnapshot querySnapshot = await _JobCollection.get();
+      QuerySnapshot querySnapshot = await jobCollection.get();
       return querySnapshot.docs.map((doc) => JobModel.fromDocument(doc)).toList();
     } catch (e) {
       throw Exception('Error getting all jobs: $e');
@@ -40,7 +40,7 @@ class JobService {
   Future<void> updateJob(JobModel job) async {
     try {
       if (job.documentId != null) {
-        await _JobCollection.doc(job.documentId).update(job.toJson());
+        await jobCollection.doc(job.documentId).update(job.toJson());
       } else {
         throw Exception('Error updating client: Document ID is null');
       }
@@ -52,7 +52,7 @@ class JobService {
   // Delete Equipment
   Future<void> deleteJob(String id) async {
     try {
-      await _JobCollection.doc(id).delete();
+      await jobCollection.doc(id).delete();
     } catch (e) {
       throw Exception('Error deleting job: $e');
     }

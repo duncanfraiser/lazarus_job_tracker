@@ -12,7 +12,7 @@ class JobListView extends StatefulWidget {
 }
 
 class _JobListViewState extends State<JobListView> {
-  final JobService _JobService = JobService();
+  final JobService jobService = JobService();
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class _JobListViewState extends State<JobListView> {
         ],
       ),
       body: FutureBuilder<List<JobModel>>(
-        future: _JobService.getAllJob(),
+        future: jobService.getAllJob(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -47,8 +47,8 @@ class _JobListViewState extends State<JobListView> {
               itemBuilder: (context, index) {
                 final job = clientList[index];
                 return ListTile(
-                  title: Text('${job.name}'),
-                  trailing: Text('${job.instructions}'),
+                  title: Text(job.name),
+                  trailing: Text(job.instructions),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -78,7 +78,7 @@ class _JobListViewState extends State<JobListView> {
                     );
 
                     if (confirmDelete == true) {
-                      await _JobService.deleteJob(job.documentId!);
+                      await jobService.deleteJob(job.documentId!);
                       setState(() {});
                     }
                   },
