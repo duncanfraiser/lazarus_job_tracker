@@ -29,6 +29,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _nameController = TextEditingController(text: widget.job?.name ?? '');
     _instructionsController = TextEditingController(text: widget.job?.instructions ?? '');
     _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
+    _loadSelectedEquipmentNames(); // Ensure names are loaded on init
   }
 
   @override
@@ -38,13 +39,15 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     super.dispose();
   }
 
-    void _loadSelectedEquipmentNames() async {
+  void _loadSelectedEquipmentNames() async {
+    print('Loading equipment names...');
     if (_selectedEquipmentIds.isNotEmpty) {
       final equipmentService = Provider.of<EquipmentService>(context, listen: false);
       for (var id in _selectedEquipmentIds) {
         final equipment = await equipmentService.getEquipmentById(id);
         setState(() {
-          _equipmentIdToName[id] = equipment!.name;
+          _equipmentIdToName[id] = equipment?.name ?? 'Unknown';
+          print('Loaded name for $id: ${_equipmentIdToName[id]}');
         });
       }
     }
@@ -59,7 +62,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
         if (widget.job == null) {
           // Create new job
           await _jobService.addJob(JobModel(
-             documentId: '', 
+            documentId: '', 
             name: name,
             instructions: instructions,
             equipmentIds: _selectedEquipmentIds,
@@ -110,7 +113,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     }
   }
 
- Future<void> _addNewEquipment(BuildContext context, EquipmentService equipmentService) async {
+  Future<void> _addNewEquipment(BuildContext context, EquipmentService equipmentService) async {
     final newEquipmentNameController = TextEditingController();
     final newEquipmentDescriptionController = TextEditingController();
     final newEquipmentPriceController = TextEditingController();
@@ -180,10 +183,10 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     final equipment = await equipmentService.getEquipmentById(id);
     setState(() {
       _selectedEquipmentIds.add(id);
-      _equipmentIdToName[id] = equipment!.name;
+      _equipmentIdToName[id] = equipment?.name ?? 'Unknown';
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final equipmentService = Provider.of<EquipmentService>(context);
@@ -199,7 +202,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             ),
         ],
       ),
-     body: Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
