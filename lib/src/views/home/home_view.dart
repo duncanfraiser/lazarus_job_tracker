@@ -1,3 +1,5 @@
+
+import 'package:lazarus_job_tracker/src/views/job/job_list_view.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -71,6 +73,20 @@ class HomeView extends StatelessWidget {
                         child: const Text('Equipment'),
                       ),
                     ),     
+                    const SizedBox(height: 15), // Add some spacing between buttons
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const JobListView()),
+                          );
+                        },
+                        child: const Text('Job'),
+                      ),
+                    ),
                     const SizedBox(height: 15), // Add some spacing between buttons
                     SizedBox(
                       width: buttonWidth,
