@@ -466,24 +466,31 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                       DropdownButtonFormField<String>(
                         value: _selectedClientId,
                         decoration: const InputDecoration(labelText: 'Select Client'),
-                        items: clientList.map((client) {
-                          return DropdownMenuItem<String>(
-                            value: client.documentId,
-                            child: Text('${client.fName} ${client.lName}'),
-                          );
-                        }).toList(),
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: 'addNewClient',
+                            child: Text('Add New Client', style: TextStyle(color: Theme.of(context).primaryColor)),
+                          ),
+                          ...clientList.map((client) {
+                            return DropdownMenuItem<String>(
+                              value: client.documentId,
+                              child: Row(
+                                children: [
+                                  if (_selectedClientId == client.documentId) 
+                                    const Icon(Icons.check, color: Colors.green),
+                                  Text('${client.fName} ${client.lName}'),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
                         onChanged: (value) {
-                          if (value != null && value != _selectedClientId) {
+                          if (value != null && value == 'addNewClient') {
+                            _addNewClient(context, clientService);
+                          } else if (value != null && value != _selectedClientId) {
                             _selectClient(value, clientService);
                           }
                         },
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => _addNewClient(context, clientService),
-                          child: const Text('Add New Client'),
-                        ),
                       ),
                     ],
                   );
@@ -500,24 +507,31 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                       DropdownButtonFormField<String>(
                         value: null,
                         decoration: const InputDecoration(labelText: 'Select Equipment'),
-                        items: equipmentList.map((equipment) {
-                          return DropdownMenuItem<String>(
-                            value: equipment.documentId,
-                            child: Text(equipment.name),
-                          );
-                        }).toList(),
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: 'addNewEquipment',
+                            child: Text('Add New Equipment', style: TextStyle(color: Theme.of(context).primaryColor)),
+                          ),
+                          ...equipmentList.map((equipment) {
+                            return DropdownMenuItem<String>(
+                              value: equipment.documentId,
+                              child: Row(
+                                children: [
+                                  if (_selectedEquipmentIds.contains(equipment.documentId)) 
+                                    const Icon(Icons.check, color: Colors.green),
+                                  Text(equipment.name),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
                         onChanged: (value) {
-                          if (value != null && !_selectedEquipmentIds.contains(value)) {
+                          if (value != null && value == 'addNewEquipment') {
+                            _addNewEquipment(context, equipmentService);
+                          } else if (value != null && !_selectedEquipmentIds.contains(value)) {
                             _selectEquipment(value, equipmentService);
                           }
                         },
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => _addNewEquipment(context, equipmentService),
-                          child: const Text('Add New Equipment'),
-                        ),
                       ),
                     ],
                   );
@@ -534,24 +548,31 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                       DropdownButtonFormField<String>(
                         value: null,
                         decoration: const InputDecoration(labelText: 'Select Material'),
-                        items: materialList.map((material) {
-                          return DropdownMenuItem<String>(
-                            value: material.documentId,
-                            child: Text(material.name),
-                          );
-                        }).toList(),
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: 'addNewMaterial',
+                            child: Text('Add New Material', style: TextStyle(color: Theme.of(context).primaryColor)),
+                          ),
+                          ...materialList.map((material) {
+                            return DropdownMenuItem<String>(
+                              value: material.documentId,
+                              child: Row(
+                                children: [
+                                  if (_selectedMaterialIds.contains(material.documentId)) 
+                                    const Icon(Icons.check, color: Colors.green),
+                                  Text(material.name),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
                         onChanged: (value) {
-                          if (value != null && !_selectedMaterialIds.contains(value)) {
+                          if (value != null && value == 'addNewMaterial') {
+                            _addNewMaterial(context, materialService);
+                          } else if (value != null && !_selectedMaterialIds.contains(value)) {
                             _selectMaterial(value, materialService);
                           }
                         },
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => _addNewMaterial(context, materialService),
-                          child: const Text('Add New Material'),
-                        ),
                       ),
                     ],
                   );
