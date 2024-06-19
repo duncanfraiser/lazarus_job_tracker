@@ -3,7 +3,7 @@ import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 
 class CreateUpdateView extends StatefulWidget {
-  final Equipment? equipment; // If null, it means we're creating a new equipment
+  final EquipmentModel? equipment; // If null, it means we're creating a new equipment
 
   const CreateUpdateView({super.key, this.equipment});
 
@@ -44,14 +44,14 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
 
         if (widget.equipment == null) {
           // Create new equipment
-          await _equipmentService.addEquipment(Equipment(
+          await _equipmentService.addEquipment(EquipmentModel(
             name: name,
             price: price,
             description: description,
           ));
         } else {
           // Update existing equipment
-          await _equipmentService.updateEquipment(Equipment(
+          await _equipmentService.updateEquipment(EquipmentModel(
             documentId: widget.equipment!.documentId,
             name: name,
             price: price,

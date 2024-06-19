@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'firebase_options.dart';
 
 import 'src/app.dart';
@@ -21,6 +23,8 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        Provider(create: (_) => JobService()),
+        Provider(create: (_) => EquipmentService()),
       ],
       child: const MyApp(),
     ),

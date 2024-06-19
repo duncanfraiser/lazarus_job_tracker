@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Equipment {
+class EquipmentModel {
   String? documentId; // firestore document ID
   String name;
   double price;
@@ -8,7 +8,7 @@ class Equipment {
   // Add other useful properties as needed
 
   // Constructor
-  Equipment({
+  EquipmentModel({
     this.documentId,
     required this.name,
     required this.price,
@@ -17,8 +17,8 @@ class Equipment {
   });
 
   // From JSON
-  factory Equipment.fromJson(Map<String, dynamic> json, String id) {
-    return Equipment(
+  factory EquipmentModel.fromJson(Map<String, dynamic> json, String id) {
+    return EquipmentModel(
       documentId: id,
       name: json['name'],
       price: json['price'],
@@ -38,7 +38,7 @@ class Equipment {
   }
 
   // From Firestore Document
-  factory Equipment.fromDocument(DocumentSnapshot doc) {
-    return Equipment.fromJson(doc.data() as Map<String, dynamic>, doc.id);
+  factory EquipmentModel.fromDocument(DocumentSnapshot doc) {
+    return EquipmentModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
   }
 }

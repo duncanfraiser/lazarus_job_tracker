@@ -4,6 +4,7 @@ class JobModel {
   String? documentId; // firestore document ID
   String name;
   String instructions;
+  List<String> equipmentIds;
   // Add other useful properties as needed
 
   // Constructor
@@ -11,6 +12,8 @@ class JobModel {
     this.documentId,
     required this.name,
     required this.instructions,
+    required this.equipmentIds,
+    
     // Initialize other properties
   });
 
@@ -20,6 +23,7 @@ class JobModel {
       documentId: id,
       name: json['name'],
       instructions: json['instructions'],
+      equipmentIds: List<String>.from(json['equipmentIds'] ?? []),
       // Initialize other properties
     );
   }
@@ -29,6 +33,7 @@ class JobModel {
     return {
       'name': name,
       'instructions': instructions,
+      'equipmentIds': equipmentIds,
       // Convert other properties
     };
   }

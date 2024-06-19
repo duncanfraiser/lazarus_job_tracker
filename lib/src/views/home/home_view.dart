@@ -34,7 +34,7 @@ class HomeView extends StatelessWidget {
           ),
         ],
       ),
-           body: Center(
+      body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(8.0),

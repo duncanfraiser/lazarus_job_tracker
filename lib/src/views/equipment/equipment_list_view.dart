@@ -31,7 +31,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Equipment>>(
+      body: FutureBuilder<List<EquipmentModel>>(
         future: _equipmentService.getAllEquipment(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

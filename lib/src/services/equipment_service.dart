@@ -5,7 +5,7 @@ class EquipmentService {
   final CollectionReference _equipmentCollection = FirebaseFirestore.instance.collection('equipment');
 
   // Add Equipment
-  Future<void> addEquipment(Equipment equipment) async {
+  Future<void> addEquipment(EquipmentModel equipment) async {
     try {
       await _equipmentCollection.add(equipment.toJson());
     } catch (e) {
@@ -14,11 +14,11 @@ class EquipmentService {
   }
 
   // Get Equipment by ID
-  Future<Equipment?> getEquipmentById(String id) async {
+  Future<EquipmentModel?> getEquipmentById(String id) async {
     try {
       DocumentSnapshot doc = await _equipmentCollection.doc(id).get();
       if (doc.exists) {
-        return Equipment.fromDocument(doc);
+        return EquipmentModel.fromDocument(doc);
       }
       return null;
     } catch (e) {
@@ -27,17 +27,25 @@ class EquipmentService {
   }
 
   // Get All Equipment
-  Future<List<Equipment>> getAllEquipment() async {
+  Future<List<EquipmentModel>> getAllEquipment() async {
     try {
       QuerySnapshot querySnapshot = await _equipmentCollection.get();
-      return querySnapshot.docs.map((doc) => Equipment.fromDocument(doc)).toList();
+      return querySnapshot.docs.map((doc) => EquipmentModel.fromDocument(doc)).toList();
     } catch (e) {
       throw Exception('Error getting all equipment: $e');
     }
   }
 
+    Stream<List<EquipmentModel>> getEquipments() {
+    return _equipmentCollection.snapshots().map((snapshot) =>
+      snapshot.docs.map((doc) => EquipmentModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList()
+    );
+  }
+
+
+
   // Update Equipment
-  Future<void> updateEquipment(Equipment equipment) async {
+  Future<void> updateEquipment(EquipmentModel equipment) async {
     try {
       if (equipment.documentId != null) {
         await _equipmentCollection.doc(equipment.documentId).update(equipment.toJson());
