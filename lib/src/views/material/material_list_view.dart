@@ -3,7 +3,6 @@ import 'package:lazarus_job_tracker/src/models/material_model.dart';
 import 'package:lazarus_job_tracker/src/services/material_service.dart';
 import 'package:lazarus_job_tracker/src/views/material/material_create_update_view.dart';
 
-
 class MaterialListView extends StatefulWidget {
   const MaterialListView({super.key});
 
@@ -46,43 +45,49 @@ class _MaterialListViewState extends State<MaterialListView> {
               itemCount: materialList.length,
               itemBuilder: (context, index) {
                 final material = materialList[index];
-                return ListTile(
-                  title: Text(material.name),
-                  subtitle: Text(material.description),
-                  trailing: Text('\$${material.price.toStringAsFixed(2)}'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MaterialCreateUpdateView(material: material),
-                      ),
-                    ).then((value) => setState(() {})); // Refresh list after returning
-                  },
-                  onLongPress: () async {
-                    // Optionally, add a delete confirmation dialog
-                    bool? confirmDelete = await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Material'),
-                        content: const Text('Are you sure you want to delete this Material?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: ListTile(
+                    title: Text(
+                      material.name,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(material.description),
+                    trailing: Text('\$${material.price.toStringAsFixed(2)}'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MaterialCreateUpdateView(material: material),
+                        ),
+                      ).then((value) => setState(() {})); // Refresh list after returning
+                    },
+                    onLongPress: () async {
+                      // Optionally, add a delete confirmation dialog
+                      bool? confirmDelete = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Delete Material'),
+                          content: const Text('Are you sure you want to delete this Material?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      );
 
-                    if (confirmDelete == true) {
-                      await _materialService.deleteMaterial(material.documentId!);
-                      setState(() {});
-                    }
-                  },
+                      if (confirmDelete == true) {
+                        await _materialService.deleteMaterial(material.documentId!);
+                        setState(() {});
+                      }
+                    },
+                  ),
                 );
               },
             );

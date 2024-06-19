@@ -3,7 +3,7 @@ import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 
 class ClientCreateUpdateView extends StatefulWidget {
-  final Client? client; // If null, it means we're creating a new equipment
+  final ClientModel? client; // If null, it means we're creating a new equipment
 
   const ClientCreateUpdateView({super.key, this.client});
 
@@ -53,7 +53,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
 
         if (widget.client == null) {
           // Create new equipment
-          await _clientService.addClient(Client(
+          await _clientService.addClient(ClientModel(
             fName: fName,
             lName: lName,
             billingAddress: billingAddress,
@@ -62,7 +62,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
           ));
         } else {
           // Update existing equipment
-          await _clientService.updateClient(Client(
+          await _clientService.updateClient(ClientModel(
             documentId: widget.client!.documentId,
             fName: fName,
             lName: lName,

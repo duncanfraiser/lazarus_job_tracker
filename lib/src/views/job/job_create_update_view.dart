@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
+import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
+import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:provider/provider.dart';
 
 class JobCreateUpdateView extends StatefulWidget {
@@ -21,7 +23,9 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   late TextEditingController _nameController;
   late TextEditingController _instructionsController;
   List<String> _selectedEquipmentIds = [];
-  final Map<String, EquipmentModel> _equipmentDetails = {}; 
+  final Map<String, EquipmentModel> _equipmentDetails = {};
+  String? _selectedClientId;
+  ClientModel? _selectedClient;
 
   @override
   void initState() {
@@ -29,6 +33,8 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _nameController = TextEditingController(text: widget.job?.name ?? '');
     _instructionsController = TextEditingController(text: widget.job?.instructions ?? '');
     _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
+    _selectedClientId = widget.job?.clientId;
+    _loadSelectedClient();
     _loadSelectedEquipmentDetails();
   }
 
@@ -37,6 +43,16 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _nameController.dispose();
     _instructionsController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSelectedClient() async {
+    if (_selectedClientId != null) {
+      final clientService = Provider.of<ClientService>(context, listen: false);
+      final client = await clientService.getClientById(_selectedClientId!);
+      setState(() {
+        _selectedClient = client;
+      });
+    }
   }
 
   Future<void> _loadSelectedEquipmentDetails() async {
@@ -66,6 +82,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             name: name,
             instructions: instructions,
             equipmentIds: _selectedEquipmentIds,
+            clientId: _selectedClientId,
           ));
         } else {
           // Update existing job
@@ -74,6 +91,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             name: name,
             instructions: instructions,
             equipmentIds: _selectedEquipmentIds,
+            clientId: _selectedClientId,
           ));
         }
 
@@ -190,9 +208,89 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     }
   }
 
+  Future<void> _selectClient(String id, ClientService clientService) async {
+    final client = await clientService.getClientById(id);
+    setState(() {
+      _selectedClientId = id;
+      _selectedClient = client;
+    });
+  }
+
+  Future<void> _addNewClient(BuildContext context, ClientService clientService) async {
+    final newClientFNameController = TextEditingController();
+    final newClientLNameController = TextEditingController();
+    final newClientAddressController = TextEditingController();
+    final newClientPhoneController = TextEditingController();
+    final newClientEmailController = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Client'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: newClientFNameController,
+              decoration: const InputDecoration(labelText: 'First Name'),
+            ),
+            TextFormField(
+              controller: newClientLNameController,
+              decoration: const InputDecoration(labelText: 'Last Name'),
+            ),
+            TextFormField(
+              controller: newClientAddressController,
+              decoration: const InputDecoration(labelText: 'Billing Address'),
+            ),
+            TextFormField(
+              controller: newClientPhoneController,
+              decoration: const InputDecoration(labelText: 'Phone Number'),
+            ),
+            TextFormField(
+              controller: newClientEmailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final fName = newClientFNameController.text;
+              final lName = newClientLNameController.text;
+              final billingAddress = newClientAddressController.text;
+              final phone = newClientPhoneController.text;
+              final email = newClientEmailController.text;
+              if (fName.isNotEmpty && lName.isNotEmpty && billingAddress.isNotEmpty && phone.isNotEmpty && email.isNotEmpty) {
+                final newClient = ClientModel(
+                  documentId: '', // Firebase will generate this automatically
+                  fName: fName,
+                  lName: lName,
+                  billingAddress: billingAddress,
+                  phone: phone,
+                  email: email,
+                );
+                final docRef = await clientService.addClient(newClient);
+                setState(() {
+                  _selectedClientId = docRef.id;
+                  _selectedClient = newClient;
+                });
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final equipmentService = Provider.of<EquipmentService>(context);
+    final clientService = Provider.of<ClientService>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -229,6 +327,40 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                     return 'Please enter job instructions.';
                   }
                   return null;
+                },
+              ),
+              StreamBuilder<List<ClientModel>>(
+                stream: clientService.getClients(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  final clientList = snapshot.data!;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        value: _selectedClientId,
+                        decoration: InputDecoration(labelText: 'Select Client'),
+                        items: clientList.map((client) {
+                          return DropdownMenuItem<String>(
+                            value: client.documentId,
+                            child: Text('${client.fName} ${client.lName}'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null && value != _selectedClientId) {
+                            _selectClient(value, clientService);
+                          }
+                        },
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => _addNewClient(context, clientService),
+                          child: const Text('Add New Client'),
+                        ),
+                      ),
+                    ],
+                  );
                 },
               ),
               StreamBuilder<List<EquipmentModel>>(

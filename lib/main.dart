@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'firebase_options.dart';
@@ -25,6 +26,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         Provider(create: (_) => JobService()),
         Provider(create: (_) => EquipmentService()),
+        Provider(create: (_) => ClientService()),
       ],
       child: const MyApp(),
     ),

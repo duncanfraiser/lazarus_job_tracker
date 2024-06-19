@@ -3,7 +3,6 @@ import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_create_update_view.dart';
 
-
 class ClientListView extends StatefulWidget {
   const ClientListView({super.key});
 
@@ -31,7 +30,7 @@ class _ClientListViewState extends State<ClientListView> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Client>>(
+      body: FutureBuilder<List<ClientModel>>(
         future: _clientService.getAllClient(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -46,48 +45,57 @@ class _ClientListViewState extends State<ClientListView> {
               itemCount: clientList.length,
               itemBuilder: (context, index) {
                 final client = clientList[index];
-                return ListTile(
-                  title: Text('${client.fName} ${client.lName}'),
-                   trailing: InkWell(
-                    child: Text(
-                      client.phone,
-                      style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: ListTile(
+                    title: Text(
+                      '${client.fName} ${client.lName}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    
-                   ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ClientCreateUpdateView(client: client),
+                    subtitle: Text('Address: ${client.billingAddress}\nEmail: ${client.email}'),
+                    trailing: InkWell(
+                      child: Text(
+                        client.phone,
+                        style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
                       ),
-                    ).then((value) => setState(() {})); // Refresh list after returning
-                  },
-                  onLongPress: () async {
-                    // Optionally, add a delete confirmation dialog
-                    bool? confirmDelete = await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Client'),
-                        content: const Text('Are you sure you want to delete this Client?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
+                      onTap: () {
+                        // Optionally, handle phone number tap, e.g., call or SMS
+                      },
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ClientCreateUpdateView(client: client),
+                        ),
+                      ).then((value) => setState(() {})); // Refresh list after returning
+                    },
+                    onLongPress: () async {
+                      // Optionally, add a delete confirmation dialog
+                      bool? confirmDelete = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Delete Client'),
+                          content: const Text('Are you sure you want to delete this client?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      );
 
-                    if (confirmDelete == true) {
-                      await _clientService.deleteClient(client.documentId!);
-                      setState(() {});
-                    }
-                  },
+                      if (confirmDelete == true) {
+                        await _clientService.deleteClient(client.documentId!);
+                        setState(() {});
+                      }
+                    },
+                  ),
                 );
               },
             );

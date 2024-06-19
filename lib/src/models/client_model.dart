@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Client {
+class ClientModel {
   String? documentId; // firestore document ID
   String fName;
   String lName;
@@ -10,7 +10,7 @@ class Client {
   // Add other useful properties as needed
 
   // Constructor
-  Client({
+  ClientModel({
     this.documentId,
     required this.fName,
     required this.lName,
@@ -21,8 +21,8 @@ class Client {
   });
 
   // From JSON
-  factory Client.fromJson(Map<String, dynamic> json, String id) {
-    return Client(
+  factory ClientModel.fromJson(Map<String, dynamic> json, String id) {
+    return ClientModel(
       documentId: id,
       fName: json['fName'],
       lName: json['lName'],
@@ -46,7 +46,7 @@ class Client {
   }
 
   // From Firestore Document
-  factory Client.fromDocument(DocumentSnapshot doc) {
-    return Client.fromJson(doc.data() as Map<String, dynamic>, doc.id);
+  factory ClientModel.fromDocument(DocumentSnapshot doc) {
+    return ClientModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
   }
 }
