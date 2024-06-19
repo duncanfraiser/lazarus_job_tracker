@@ -1,4 +1,3 @@
-
 import 'package:lazarus_job_tracker/src/views/job/job_list_view.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -41,66 +40,98 @@ class HomeView extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 // Calculate the width as a percentage of the available width
-                double buttonWidth = constraints.maxWidth * 0.7; // 80% of the screen width
+                double cardWidth = constraints.maxWidth * 0.7; // 70% of the screen width
 
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
-                      width: buttonWidth,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ClientListView()),
-                          );
-                        },
-                        child: const Text('Clients'),
+                      width: cardWidth,
+                      child: Card(
+                        elevation: 4.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ClientListView()),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Center(child: Text('Clients', style: Theme.of(context).textTheme.titleLarge)),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 15), // Add some spacing between buttons
+                    const SizedBox(height: 15), // Add some spacing between cards
                     SizedBox(
-                      width: buttonWidth,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const EquipmentListView()),
-                          );
-                        },
-                        child: const Text('Equipment'),
+                      width: cardWidth,
+                      child: Card(
+                        elevation: 4.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const EquipmentListView()),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Center(child: Text('Equipment', style: Theme.of(context).textTheme.titleLarge)),
+                          ),
+                        ),
                       ),
                     ),     
-                    const SizedBox(height: 15), // Add some spacing between buttons
+                    const SizedBox(height: 15), // Add some spacing between cards
                     SizedBox(
-                      width: buttonWidth,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const JobListView()),
-                          );
-                        },
-                        child: const Text('Job'),
+                      width: cardWidth,
+                      child: Card(
+                        elevation: 4.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const JobListView()),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Center(child: Text('Job', style: Theme.of(context).textTheme.titleLarge)),
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 15), // Add some spacing between buttons
+                    const SizedBox(height: 15), // Add some spacing between cards
                     SizedBox(
-                      width: buttonWidth,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const MaterialListView()),
-                          );
-                        },
-                        child: const Text('Material'),
+                      width: cardWidth,
+                      child: Card(
+                        elevation: 4.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MaterialListView()),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Center(child: Text('Material', style: Theme.of(context).textTheme.titleLarge)),
+                          ),
+                        ),
                       ),
-                    ),               // Add more buttons here if needed
+                    ),               // Add more cards here if needed
                   ],
                 );
               },

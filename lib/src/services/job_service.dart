@@ -39,12 +39,8 @@ class JobService {
   // Update Client
   Future<void> updateJob(JobModel job) async {
     try {
-      if (job.documentId != null) {
-        await jobCollection.doc(job.documentId).update(job.toJson());
-      } else {
-        throw Exception('Error updating client: Document ID is null');
-      }
-    } catch (e) {
+      await jobCollection.doc(job.documentId).update(job.toJson());
+        } catch (e) {
       throw Exception('Error updating client: $e');
     }
   }

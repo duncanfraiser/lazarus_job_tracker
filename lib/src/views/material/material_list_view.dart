@@ -50,7 +50,7 @@ class _MaterialListViewState extends State<MaterialListView> {
                   child: ListTile(
                     title: Text(
                       material.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(material.description),
                     trailing: Text('\$${material.price.toStringAsFixed(2)}'),

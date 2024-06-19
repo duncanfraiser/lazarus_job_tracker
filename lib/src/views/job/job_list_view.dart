@@ -48,7 +48,7 @@ class _JobListViewState extends State<JobListView> {
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
-                    title: Text(job.name, style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(job.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(job.instructions),
                     onTap: () {
                       Navigator.push(
@@ -79,7 +79,7 @@ class _JobListViewState extends State<JobListView> {
                       );
 
                       if (confirmDelete == true) {
-                        await jobService.deleteJob(job.documentId!);
+                        await jobService.deleteJob(job.documentId);
                         setState(() {});
                       }
                     },

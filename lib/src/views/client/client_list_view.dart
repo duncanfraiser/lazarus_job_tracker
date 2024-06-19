@@ -50,7 +50,7 @@ class _ClientListViewState extends State<ClientListView> {
                   child: ListTile(
                     title: Text(
                       '${client.fName} ${client.lName}',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text('Address: ${client.billingAddress}\nEmail: ${client.email}'),
                     trailing: InkWell(

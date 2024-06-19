@@ -50,7 +50,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                   child: ListTile(
                     title: Text(
                       equipment.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(equipment.description),
                     trailing: Text('\$${equipment.price.toStringAsFixed(2)}'),

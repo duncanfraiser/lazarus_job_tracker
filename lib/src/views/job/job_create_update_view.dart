@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
+import 'package:lazarus_job_tracker/src/models/material_model.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:lazarus_job_tracker/src/services/material_service.dart';
 import 'package:provider/provider.dart';
 
 class JobCreateUpdateView extends StatefulWidget {
@@ -24,6 +26,8 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   late TextEditingController _instructionsController;
   List<String> _selectedEquipmentIds = [];
   final Map<String, EquipmentModel> _equipmentDetails = {};
+  List<String> _selectedMaterialIds = [];
+  final Map<String, MaterialModel> _materialDetails = {};
   String? _selectedClientId;
   ClientModel? _selectedClient;
 
@@ -33,9 +37,11 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _nameController = TextEditingController(text: widget.job?.name ?? '');
     _instructionsController = TextEditingController(text: widget.job?.instructions ?? '');
     _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
+    _selectedMaterialIds = widget.job?.materialIds ?? [];
     _selectedClientId = widget.job?.clientId;
     _loadSelectedClient();
     _loadSelectedEquipmentDetails();
+    _loadSelectedMaterialDetails();
   }
 
   @override
@@ -49,9 +55,11 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     if (_selectedClientId != null) {
       final clientService = Provider.of<ClientService>(context, listen: false);
       final client = await clientService.getClientById(_selectedClientId!);
-      setState(() {
-        _selectedClient = client;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedClient = client;
+        });
+      }
     }
   }
 
@@ -60,9 +68,27 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
       final equipmentService = Provider.of<EquipmentService>(context, listen: false);
       for (var id in _selectedEquipmentIds) {
         final equipment = await equipmentService.getEquipmentById(id);
-        if (equipment != null) {
+        if (mounted) {
           setState(() {
-            _equipmentDetails[id] = equipment;
+            if (equipment != null) {
+              _equipmentDetails[id] = equipment;
+            }
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> _loadSelectedMaterialDetails() async {
+    if (_selectedMaterialIds.isNotEmpty) {
+      final materialService = Provider.of<MaterialService>(context, listen: false);
+      for (var id in _selectedMaterialIds) {
+        final material = await materialService.getMaterialById(id);
+        if (mounted) {
+          setState(() {
+            if (material != null) {
+              _materialDetails[id] = material;
+            }
           });
         }
       }
@@ -82,6 +108,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             name: name,
             instructions: instructions,
             equipmentIds: _selectedEquipmentIds,
+            materialIds: _selectedMaterialIds,
             clientId: _selectedClientId,
           ));
         } else {
@@ -91,21 +118,26 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             name: name,
             instructions: instructions,
             equipmentIds: _selectedEquipmentIds,
+            materialIds: _selectedMaterialIds,
             clientId: _selectedClientId,
           ));
         }
 
-        Navigator.pop(context);
+        if (mounted) {
+          Navigator.pop(context);
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error: $e'),
-        ));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Error: $e'),
+          ));
+        }
       }
     }
   }
 
   void _deleteJob() async {
-    if (widget.job != null && widget.job!.documentId != null) {
+    if (widget.job != null) {
       bool? confirmDelete = await showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -125,8 +157,10 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
       );
 
       if (confirmDelete == true) {
-        await _jobService.deleteJob(widget.job!.documentId!);
-        Navigator.of(context).pop(); // Close the form after deletion
+        await _jobService.deleteJob(widget.job!.documentId);
+        if (mounted) {
+          Navigator.of(context).pop(); // Close the form after deletion
+        }
       }
     }
   }
@@ -184,11 +218,86 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   price: price,
                 );
                 final docRef = await equipmentService.addEquipment(newEquipment);
-                setState(() {
-                  _selectedEquipmentIds.add(docRef.id);
-                  _equipmentDetails[docRef.id] = newEquipment;
-                });
-                Navigator.of(context).pop();
+                if (mounted) {
+                  setState(() {
+                    _selectedEquipmentIds.add(docRef.id);
+                    _equipmentDetails[docRef.id] = newEquipment;
+                  });
+                }
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _addNewMaterial(BuildContext context, MaterialService materialService) async {
+    final newMaterialNameController = TextEditingController();
+    final newMaterialDescriptionController = TextEditingController();
+    final newMaterialPriceController = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Material'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: newMaterialNameController,
+              decoration: const InputDecoration(labelText: 'Material Name'),
+            ),
+            TextFormField(
+              controller: newMaterialPriceController,
+              decoration: const InputDecoration(labelText: 'Price'),
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a price';
+                }
+                if (double.tryParse(value) == null) {
+                  return 'Please enter a valid number';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: newMaterialDescriptionController,
+              decoration: const InputDecoration(labelText: 'Material Description'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final name = newMaterialNameController.text;
+              final description = newMaterialDescriptionController.text;
+              final price = double.tryParse(newMaterialPriceController.text) ?? 0.0;
+              if (name.isNotEmpty && description.isNotEmpty) {
+                final newMaterial = MaterialModel(
+                  documentId: '', // Firebase will generate this automatically
+                  name: name,
+                  description: description, 
+                  price: price,
+                );
+                final docRef = await materialService.addMaterial(newMaterial);
+                if (mounted) {
+                  setState(() {
+                    _selectedMaterialIds.add(docRef.id);
+                    _materialDetails[docRef.id] = newMaterial;
+                  });
+                }
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               }
             },
             child: const Text('Add'),
@@ -200,20 +309,32 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
 
   Future<void> _selectEquipment(String id, EquipmentService equipmentService) async {
     final equipment = await equipmentService.getEquipmentById(id);
-    if (equipment != null) {
+    if (mounted) {
       setState(() {
         _selectedEquipmentIds.add(id);
-        _equipmentDetails[id] = equipment;
+        _equipmentDetails[id] = equipment!;
+      });
+    }
+  }
+
+  Future<void> _selectMaterial(String id, MaterialService materialService) async {
+    final material = await materialService.getMaterialById(id);
+    if (mounted) {
+      setState(() {
+        _selectedMaterialIds.add(id);
+        _materialDetails[id] = material!;
       });
     }
   }
 
   Future<void> _selectClient(String id, ClientService clientService) async {
     final client = await clientService.getClientById(id);
-    setState(() {
-      _selectedClientId = id;
-      _selectedClient = client;
-    });
+    if (mounted) {
+      setState(() {
+        _selectedClientId = id;
+        _selectedClient = client;
+      });
+    }
   }
 
   Future<void> _addNewClient(BuildContext context, ClientService clientService) async {
@@ -273,11 +394,15 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   email: email,
                 );
                 final docRef = await clientService.addClient(newClient);
-                setState(() {
-                  _selectedClientId = docRef.id;
-                  _selectedClient = newClient;
-                });
-                Navigator.of(context).pop();
+                if (mounted) {
+                  setState(() {
+                    _selectedClientId = docRef.id;
+                    _selectedClient = newClient;
+                  });
+                }
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
               }
             },
             child: const Text('Add'),
@@ -291,6 +416,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   Widget build(BuildContext context) {
     final equipmentService = Provider.of<EquipmentService>(context);
     final clientService = Provider.of<ClientService>(context);
+    final materialService = Provider.of<MaterialService>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -332,14 +458,14 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
               StreamBuilder<List<ClientModel>>(
                 stream: clientService.getClients(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  if (!snapshot.hasData) return const CircularProgressIndicator();
                   final clientList = snapshot.data!;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<String>(
                         value: _selectedClientId,
-                        decoration: InputDecoration(labelText: 'Select Client'),
+                        decoration: const InputDecoration(labelText: 'Select Client'),
                         items: clientList.map((client) {
                           return DropdownMenuItem<String>(
                             value: client.documentId,
@@ -366,14 +492,14 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
               StreamBuilder<List<EquipmentModel>>(
                 stream: equipmentService.getEquipments(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  if (!snapshot.hasData) return const CircularProgressIndicator();
                   final equipmentList = snapshot.data!;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       DropdownButtonFormField<String>(
                         value: null,
-                        decoration: InputDecoration(labelText: 'Select Equipment'),
+                        decoration: const InputDecoration(labelText: 'Select Equipment'),
                         items: equipmentList.map((equipment) {
                           return DropdownMenuItem<String>(
                             value: equipment.documentId,
@@ -397,6 +523,40 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   );
                 },
               ),
+              StreamBuilder<List<MaterialModel>>(
+                stream: materialService.getMaterials(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const CircularProgressIndicator();
+                  final materialList = snapshot.data!;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        value: null,
+                        decoration: const InputDecoration(labelText: 'Select Material'),
+                        items: materialList.map((material) {
+                          return DropdownMenuItem<String>(
+                            value: material.documentId,
+                            child: Text(material.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null && !_selectedMaterialIds.contains(value)) {
+                            _selectMaterial(value, materialService);
+                          }
+                        },
+                      ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => _addNewMaterial(context, materialService),
+                          child: const Text('Add New Material'),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
               const SizedBox(height: 20),
               Text('Selected Equipment', style: Theme.of(context).textTheme.bodyLarge),
               ListView.builder(
@@ -414,6 +574,29 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                         setState(() {
                           _selectedEquipmentIds.remove(id);
                           _equipmentDetails.remove(id);
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              Text('Selected Materials', style: Theme.of(context).textTheme.bodyLarge),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: _selectedMaterialIds.length,
+                itemBuilder: (context, index) {
+                  final id = _selectedMaterialIds[index];
+                  final material = _materialDetails[id];
+                  return ListTile(
+                    title: Text(material?.name ?? 'Loading...'),
+                    subtitle: Text('Price: \$${material?.price.toStringAsFixed(2) ?? 'Loading...'}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        setState(() {
+                          _selectedMaterialIds.remove(id);
+                          _materialDetails.remove(id);
                         });
                       },
                     ),

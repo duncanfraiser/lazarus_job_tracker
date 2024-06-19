@@ -5,8 +5,8 @@ class JobModel {
   final String name;
   final String instructions;
   final List<String> equipmentIds;
+  final List<String> materialIds; // Add material IDs
   final String? clientId; // Add client ID
-  // Add other useful properties as needed
 
   // Constructor
   JobModel({
@@ -14,6 +14,7 @@ class JobModel {
     required this.name,
     required this.instructions,
     required this.equipmentIds,
+    required this.materialIds, // Add material IDs
     this.clientId, // Add client ID
   });
 
@@ -24,8 +25,8 @@ class JobModel {
       name: json['name'],
       instructions: json['instructions'],
       equipmentIds: List<String>.from(json['equipmentIds'] ?? []),
+      materialIds: List<String>.from(json['materialIds'] ?? []), // Add material IDs
       clientId: json['clientId'], // Add client ID
-      // Initialize other properties
     );
   }
 
@@ -35,8 +36,8 @@ class JobModel {
       'name': name,
       'instructions': instructions,
       'equipmentIds': equipmentIds,
+      'materialIds': materialIds, // Add material IDs
       'clientId': clientId, // Add client ID
-      // Convert other properties
     };
   }
 

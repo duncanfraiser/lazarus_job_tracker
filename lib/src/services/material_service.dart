@@ -4,14 +4,14 @@ import 'package:lazarus_job_tracker/src/models/material_model.dart';
 class MaterialService {
   final CollectionReference _materialCollection = FirebaseFirestore.instance.collection('material');
 
-  // Add Material
-  Future<void> addMaterial(MaterialModel material) async {
-    try {
-      await _materialCollection.add(material.toJson());
+  Future<DocumentReference> addMaterial(MaterialModel material) {
+      try {
+      return _materialCollection.add(material.toJson());
     } catch (e) {
       throw Exception('Error adding material: $e');
     }
   }
+
 
   // Get Material by ID
   Future<MaterialModel?> getMaterialById(String id) async {
@@ -49,6 +49,12 @@ class MaterialService {
     }
   }
 
+  Stream<List<MaterialModel>> getMaterials() {
+    return _materialCollection.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => MaterialModel.fromDocument(doc)).toList();
+    });
+  }
+  
   // Delete Material
   Future<void> deleteMaterial(String id) async {
     try {
