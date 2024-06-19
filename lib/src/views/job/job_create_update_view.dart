@@ -21,7 +21,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   late TextEditingController _nameController;
   late TextEditingController _instructionsController;
   List<String> _selectedEquipmentIds = [];
-  final Map<String, String> _equipmentIdToName = {}; 
+  final Map<String, EquipmentModel> _equipmentDetails = {}; 
 
   @override
   void initState() {
@@ -29,7 +29,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _nameController = TextEditingController(text: widget.job?.name ?? '');
     _instructionsController = TextEditingController(text: widget.job?.instructions ?? '');
     _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
-    _loadSelectedEquipmentNames(); // Ensure names are loaded on init
+    _loadSelectedEquipmentDetails();
   }
 
   @override
@@ -39,16 +39,16 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     super.dispose();
   }
 
-  void _loadSelectedEquipmentNames() async {
-    print('Loading equipment names...');
+  Future<void> _loadSelectedEquipmentDetails() async {
     if (_selectedEquipmentIds.isNotEmpty) {
       final equipmentService = Provider.of<EquipmentService>(context, listen: false);
       for (var id in _selectedEquipmentIds) {
         final equipment = await equipmentService.getEquipmentById(id);
-        setState(() {
-          _equipmentIdToName[id] = equipment?.name ?? 'Unknown';
-          print('Loaded name for $id: ${_equipmentIdToName[id]}');
-        });
+        if (equipment != null) {
+          setState(() {
+            _equipmentDetails[id] = equipment;
+          });
+        }
       }
     }
   }
@@ -157,17 +157,18 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             onPressed: () async {
               final name = newEquipmentNameController.text;
               final description = newEquipmentDescriptionController.text;
+              final price = double.tryParse(newEquipmentPriceController.text) ?? 0.0;
               if (name.isNotEmpty && description.isNotEmpty) {
                 final newEquipment = EquipmentModel(
                   documentId: '', // Firebase will generate this automatically
                   name: name,
                   description: description, 
-                  price: 0.0,
+                  price: price,
                 );
                 final docRef = await equipmentService.addEquipment(newEquipment);
                 setState(() {
                   _selectedEquipmentIds.add(docRef.id);
-                  _equipmentIdToName[docRef.id] = name;
+                  _equipmentDetails[docRef.id] = newEquipment;
                 });
                 Navigator.of(context).pop();
               }
@@ -181,10 +182,12 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
 
   Future<void> _selectEquipment(String id, EquipmentService equipmentService) async {
     final equipment = await equipmentService.getEquipmentById(id);
-    setState(() {
-      _selectedEquipmentIds.add(id);
-      _equipmentIdToName[id] = equipment?.name ?? 'Unknown';
-    });
+    if (equipment != null) {
+      setState(() {
+        _selectedEquipmentIds.add(id);
+        _equipmentDetails[id] = equipment;
+      });
+    }
   }
 
   @override
@@ -262,18 +265,28 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   );
                 },
               ),
-              Wrap(
-                children: _selectedEquipmentIds.map((id) {
-                  return Chip(
-                    label: Text(_equipmentIdToName[id] ?? 'Loading...'),
-                    onDeleted: () {
-                      setState(() {
-                        _selectedEquipmentIds.remove(id);
-                        _equipmentIdToName.remove(id);
-                      });
-                    },
+              const SizedBox(height: 20),
+              Text('Selected Equipment', style: Theme.of(context).textTheme.bodyLarge),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: _selectedEquipmentIds.length,
+                itemBuilder: (context, index) {
+                  final id = _selectedEquipmentIds[index];
+                  final equipment = _equipmentDetails[id];
+                  return ListTile(
+                    title: Text(equipment?.name ?? 'Loading...'),
+                    subtitle: Text('Price: \$${equipment?.price.toStringAsFixed(2) ?? 'Loading...'}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        setState(() {
+                          _selectedEquipmentIds.remove(id);
+                          _equipmentDetails.remove(id);
+                        });
+                      },
+                    ),
                   );
-                }).toList(),
+                },
               ),
               const SizedBox(height: 20),
               ElevatedButton(
