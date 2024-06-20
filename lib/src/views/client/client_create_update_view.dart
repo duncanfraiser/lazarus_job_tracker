@@ -3,7 +3,7 @@ import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 
 class ClientCreateUpdateView extends StatefulWidget {
-  final ClientModel? client; // If null, it means we're creating a new equipment
+  final ClientModel? client; // If null, it means we're creating a new client
 
   const ClientCreateUpdateView({super.key, this.client});
 
@@ -17,7 +17,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
 
   late TextEditingController _fNameController;
   late TextEditingController _lNameController;
-  late TextEditingController _billingAddressController;
+  late TextEditingController _addressController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
 
@@ -26,7 +26,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
     super.initState();
     _fNameController = TextEditingController(text: widget.client?.fName ?? '');
     _lNameController = TextEditingController(text: widget.client?.lName ?? '');
-    _billingAddressController = TextEditingController(text: widget.client?.billingAddress ?? '');
+    _addressController = TextEditingController(text: widget.client?.billingAddress ?? '');
     _phoneController = TextEditingController(text: widget.client?.phone ?? '');
     _emailController = TextEditingController(text: widget.client?.email ?? '');
   }
@@ -35,7 +35,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
   void dispose() {
     _fNameController.dispose();
     _lNameController.dispose();
-    _billingAddressController.dispose();
+    _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     super.dispose();
@@ -46,27 +46,26 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
       try {
         final fName = _fNameController.text;
         final lName = _lNameController.text;
-        final billingAddress = _billingAddressController.text;
+        final address = _addressController.text;
         final phone = _phoneController.text;
         final email = _emailController.text;
-        
 
         if (widget.client == null) {
-          // Create new equipment
+          // Create new client
           await _clientService.addClient(ClientModel(
             fName: fName,
             lName: lName,
-            billingAddress: billingAddress,
+            billingAddress: address,
             phone: phone,
             email: email,
           ));
         } else {
-          // Update existing equipment
+          // Update existing client
           await _clientService.updateClient(ClientModel(
             documentId: widget.client!.documentId,
             fName: fName,
             lName: lName,
-            billingAddress: billingAddress,
+            billingAddress: address,
             phone: phone,
             email: email,
           ));
@@ -103,7 +102,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
 
       if (confirmDelete == true) {
         await _clientService.deleteClient(widget.client!.documentId!);
-        Navigator.of(context).pop(); // Close the form after deletion
+        Navigator.pop(context); // Close the form after deletion
       }
     }
   }
@@ -112,9 +111,9 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.client == null ? 'Add Client' : 'Update Client'),
+        title: Text(widget.client == null ? 'Create Client' : 'Update Client'),
         actions: [
-          if (widget.client != null) // Show delete button only for existing equipment
+          if (widget.client != null) // Show delete button only for existing client
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteClient,
@@ -142,41 +141,41 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
                 decoration: const InputDecoration(labelText: 'Last Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a lrast name';
+                    return 'Please enter a last name';
                   }
                   return null;
                 },
               ),
               TextFormField(
-                controller: _billingAddressController,
+                controller: _addressController,
                 decoration: const InputDecoration(labelText: 'Billing Address'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a billing address';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email Address'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter email.';
+                    return 'Please enter an address';
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
+                decoration: const InputDecoration(labelText: 'Phone'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter phone number.';
+                    return 'Please enter a phone number';
                   }
                   return null;
                 },
-              ),              
+              ),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,

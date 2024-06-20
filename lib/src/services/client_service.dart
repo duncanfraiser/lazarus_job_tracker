@@ -65,12 +65,4 @@ class ClientService {
       snapshot.docs.map((doc) => ClientModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList()
     );
   }
-
-  // Future<ClientModel?> getClientById(String id) async {
-  //   final doc = await clientCollection.doc(id).get();
-  //   if (doc.exists) {
-  //     return ClientModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
-  //   }
-  //   return null;
-  // }
 }

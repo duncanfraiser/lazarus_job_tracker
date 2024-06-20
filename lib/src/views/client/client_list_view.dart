@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_create_update_view.dart';
+import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
+import 'package:provider/provider.dart';
 
 class ClientListView extends StatefulWidget {
   const ClientListView({super.key});
@@ -38,7 +40,7 @@ class _ClientListViewState extends State<ClientListView> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No client found'));
+            return const Center(child: Text('No clients found'));
           } else {
             final clientList = snapshot.data!;
             return ListView.builder(
@@ -52,21 +54,12 @@ class _ClientListViewState extends State<ClientListView> {
                       '${client.fName} ${client.lName}',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text('Address: ${client.billingAddress}\nEmail: ${client.email}'),
-                    trailing: InkWell(
-                      child: Text(
-                        client.phone,
-                        style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
-                      ),
-                      onTap: () {
-                        // Optionally, handle phone number tap, e.g., call or SMS
-                      },
-                    ),
+                    subtitle: Text(client.email),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ClientCreateUpdateView(client: client),
+                          builder: (context) => ClientDetailView(client: client),
                         ),
                       ).then((value) => setState(() {})); // Refresh list after returning
                     },
