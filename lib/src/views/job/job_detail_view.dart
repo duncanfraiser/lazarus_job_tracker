@@ -7,6 +7,9 @@ import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart';
+import 'package:lazarus_job_tracker/src/views/equipment/equipment_detail_view.dart';
+import 'package:lazarus_job_tracker/src/views/material/material_detail_view.dart';
+import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
 import 'package:provider/provider.dart';
 
 class JobDetailView extends StatelessWidget {
@@ -78,6 +81,14 @@ class JobDetailView extends StatelessWidget {
                   child: ListTile(
                     title: Text('${client.fName} ${client.lName}'),
                     subtitle: Text('Address: ${client.billingAddress}\nPhone: ${client.phone}\nEmail: ${client.email}'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ClientDetailView(client: client),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
@@ -107,6 +118,14 @@ class JobDetailView extends StatelessWidget {
                       child: ListTile(
                         title: Text(equipment.name),
                         subtitle: Text('Price: \$${equipment.price.toStringAsFixed(2)}'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EquipmentDetailView(equipment: equipment),
+                            ),
+                          );
+                        },
                       ),
                     );
                   }).toList(),
@@ -138,6 +157,14 @@ class JobDetailView extends StatelessWidget {
                       child: ListTile(
                         title: Text(material.name),
                         subtitle: Text('Price: \$${material.price.toStringAsFixed(2)}'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MaterialDetailView(material: material),
+                            ),
+                          );
+                        },
                       ),
                     );
                   }).toList(),
