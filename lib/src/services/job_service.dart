@@ -4,7 +4,7 @@ import 'package:lazarus_job_tracker/src/models/job_model.dart';
 class JobService {
   final CollectionReference jobCollection = FirebaseFirestore.instance.collection('job');
 
-  // Add Client
+  // Add Job
   Future<void> addJob(JobModel job) async {
     try {
       await jobCollection.add(job.toJson());
@@ -13,7 +13,7 @@ class JobService {
     }
   }
 
-  // Get Client by ID
+  // Get Job by ID
   Future<JobModel?> getJobById(String id) async {
     try {
       DocumentSnapshot doc = await jobCollection.doc(id).get();
@@ -26,8 +26,8 @@ class JobService {
     }
   }
 
-  // Get All Client
-  Future<List<JobModel>> getAllJob() async {
+  // Get All Jobs
+  Future<List<JobModel>> getAllJobs() async {
     try {
       QuerySnapshot querySnapshot = await jobCollection.get();
       return querySnapshot.docs.map((doc) => JobModel.fromDocument(doc)).toList();
@@ -36,16 +36,23 @@ class JobService {
     }
   }
 
-  // Update Client
+  // Get Jobs as Stream
+  Stream<List<JobModel>> getJobs() {
+    return jobCollection.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => JobModel.fromDocument(doc)).toList();
+    });
+  }
+
+  // Update Job
   Future<void> updateJob(JobModel job) async {
     try {
       await jobCollection.doc(job.documentId).update(job.toJson());
-        } catch (e) {
-      throw Exception('Error updating client: $e');
+    } catch (e) {
+      throw Exception('Error updating job: $e');
     }
   }
 
-  // Delete Equipment
+  // Delete Job
   Future<void> deleteJob(String id) async {
     try {
       await jobCollection.doc(id).delete();

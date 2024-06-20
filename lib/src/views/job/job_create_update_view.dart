@@ -482,7 +482,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                                 ],
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                         onChanged: (value) {
                           if (value != null && value == 'addNewClient') {
@@ -523,7 +523,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                                 ],
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                         onChanged: (value) {
                           if (value != null && value == 'addNewEquipment') {
@@ -564,7 +564,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                                 ],
                               ),
                             );
-                          }).toList(),
+                          }),
                         ],
                         onChanged: (value) {
                           if (value != null && value == 'addNewMaterial') {
