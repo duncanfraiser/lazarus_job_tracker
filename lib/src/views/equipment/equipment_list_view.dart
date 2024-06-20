@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
-import 'package:lazarus_job_tracker/src/views/equipment/create_update_view.dart';
+import 'package:lazarus_job_tracker/src/views/equipment/equipment_create_update_view.dart';
+import 'package:lazarus_job_tracker/src/views/equipment/equipment_detail_view.dart';
 
 class EquipmentListView extends StatefulWidget {
   const EquipmentListView({super.key});
@@ -24,7 +25,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateUpdateView()),
+                MaterialPageRoute(builder: (context) => const EquipmentCreateUpdateView()),
               ).then((value) => setState(() {})); // Refresh list after returning
             },
           ),
@@ -58,7 +59,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CreateUpdateView(equipment: equipment),
+                          builder: (context) => EquipmentDetailView(equipment: equipment),
                         ),
                       ).then((value) => setState(() {})); // Refresh list after returning
                     },
@@ -97,4 +98,3 @@ class _EquipmentListViewState extends State<EquipmentListView> {
     );
   }
 }
-

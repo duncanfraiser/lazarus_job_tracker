@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 
-class CreateUpdateView extends StatefulWidget {
+class EquipmentCreateUpdateView extends StatefulWidget {
   final EquipmentModel? equipment; // If null, it means we're creating a new equipment
 
-  const CreateUpdateView({super.key, this.equipment});
+  const EquipmentCreateUpdateView({super.key, this.equipment});
 
   @override
-  _CreateUpdateViewState createState() => _CreateUpdateViewState();
+  _EquipmentCreateUpdateViewState createState() => _EquipmentCreateUpdateViewState();
 }
 
-class _CreateUpdateViewState extends State<CreateUpdateView> {
+class _EquipmentCreateUpdateViewState extends State<EquipmentCreateUpdateView> {
   final _formKey = GlobalKey<FormState>();
   final EquipmentService _equipmentService = EquipmentService();
 
