@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/models/job_model.dart';
-import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
-import 'package:lazarus_job_tracker/src/models/material_model.dart';
+import 'package:intl/intl.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
+import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
+import 'package:lazarus_job_tracker/src/models/job_model.dart';
+import 'package:lazarus_job_tracker/src/models/material_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_service.dart'; // Import JobService to update job in database
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_usage_dialog.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart';
 import 'package:lazarus_job_tracker/src/views/material/material_detail_view.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
 import 'package:provider/provider.dart';
 
-class JobDetailView extends StatelessWidget {
+class JobDetailView extends StatefulWidget {
   final JobModel job;
 
   const JobDetailView({super.key, required this.job});
 
   @override
+  _JobDetailViewState createState() => _JobDetailViewState();
+}
+
+class _JobDetailViewState extends State<JobDetailView> {
+  @override
   Widget build(BuildContext context) {
     final equipmentService = Provider.of<EquipmentService>(context, listen: false);
     final materialService = Provider.of<MaterialService>(context, listen: false);
     final clientService = Provider.of<ClientService>(context, listen: false);
+    final jobService = Provider.of<JobService>(context, listen: false); // Get JobService
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(job.name),
+        title: Text(widget.job.name),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -33,14 +41,14 @@ class JobDetailView extends StatelessWidget {
           children: [
             Text('Instructions:', style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8.0),
-            Text(job.instructions),
+            Text(widget.job.instructions),
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => JobCreateUpdateView(job: job),
+                    builder: (context) => JobCreateUpdateView(job: widget.job),
                   ),
                 );
               },
@@ -50,7 +58,7 @@ class JobDetailView extends StatelessWidget {
             Text('Client', style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8.0),
             FutureBuilder<ClientModel?>(
-              future: _loadClientDetails(clientService, job.clientId),
+              future: _loadClientDetails(clientService, widget.job.clientId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -85,7 +93,7 @@ class JobDetailView extends StatelessWidget {
             Text('Equipment', style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8.0),
             FutureBuilder<List<EquipmentModel>>(
-              future: _loadEquipmentDetails(equipmentService, job.equipmentIds),
+              future: _loadEquipmentDetails(equipmentService, widget.job.equipmentIds),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -98,6 +106,10 @@ class JobDetailView extends StatelessWidget {
                 final equipmentList = snapshot.data!;
                 return Column(
                   children: equipmentList.map((equipment) {
+                    final usage = widget.job.equipmentUsage[equipment.documentId] ?? [];
+                    final totalHours = usage.fold<double>(0, (sum, item) => sum + item.hours);
+                    final totalCost = totalHours * equipment.ratePerHour;
+
                     return Card(
                       elevation: 4.0,
                       shape: RoundedRectangleBorder(
@@ -105,9 +117,15 @@ class JobDetailView extends StatelessWidget {
                       ),
                       child: ListTile(
                         title: Text(equipment.name),
-                        subtitle: Text('Rate per Hour: \$${equipment.ratePerHour.toStringAsFixed(2)}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Rate per Hour: \$${equipment.ratePerHour.toStringAsFixed(2)}'),
+                            Text('Total Hours: ${totalHours.toStringAsFixed(2)}'),
+                            Text('Total Cost: \$${totalCost.toStringAsFixed(2)}'),
+                          ],
+                        ),
                         onTap: () async {
-                          final usage = job.equipmentUsage[equipment.documentId!] ?? [];
                           final result = await showDialog<List<EquipmentUsage>>(
                             context: context,
                             builder: (context) => EquipmentUsageDialog(
@@ -118,8 +136,12 @@ class JobDetailView extends StatelessWidget {
 
                           if (result != null) {
                             // Update the job's equipment usage and save it to the database
-                            job.equipmentUsage[equipment.documentId!] = result;
-                            // Save job to Firestore here
+                            setState(() {
+                              if (equipment.documentId != null) {
+                                widget.job.equipmentUsage[equipment.documentId!] = result;
+                              }
+                            });
+                            await jobService.updateJob(widget.job); // Save job to Firestore
                           }
                         },
                       ),
@@ -132,7 +154,7 @@ class JobDetailView extends StatelessWidget {
             Text('Materials', style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8.0),
             FutureBuilder<List<MaterialModel>>(
-              future: _loadMaterialDetails(materialService, job.materialIds),
+              future: _loadMaterialDetails(materialService, widget.job.materialIds),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
