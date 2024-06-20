@@ -4,14 +4,13 @@ import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 class EquipmentService {
   final CollectionReference equipmentCollection = FirebaseFirestore.instance.collection('equipment');
 
-    Future<DocumentReference> addEquipment(EquipmentModel equipment) async {
-      try {
-        return await equipmentCollection.add(equipment.toJson());
-      } catch (e) {
-         throw Exception('Error adding equipment: $e');
-      }
+  Future<DocumentReference> addEquipment(EquipmentModel equipment) async {
+    try {
+      return await equipmentCollection.add(equipment.toJson());
+    } catch (e) {
+      throw Exception('Error adding equipment: $e');
+    }
   }
-
 
   // Get Equipment by ID
   Future<EquipmentModel?> getEquipmentById(String id) async {
@@ -36,13 +35,10 @@ class EquipmentService {
     }
   }
 
-    Stream<List<EquipmentModel>> getEquipments() {
+  Stream<List<EquipmentModel>> getEquipments() {
     return equipmentCollection.snapshots().map((snapshot) =>
-      snapshot.docs.map((doc) => EquipmentModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList()
-    );
+        snapshot.docs.map((doc) => EquipmentModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
-
-
 
   // Update Equipment
   Future<void> updateEquipment(EquipmentModel equipment) async {

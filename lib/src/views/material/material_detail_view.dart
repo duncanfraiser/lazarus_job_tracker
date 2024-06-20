@@ -59,7 +59,7 @@ class MaterialDetailView extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: ListTile(
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(content),
       ),
     );

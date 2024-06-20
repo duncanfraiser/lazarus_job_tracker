@@ -54,7 +54,7 @@ class _EquipmentListViewState extends State<EquipmentListView> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(equipment.description),
-                    trailing: Text('\$${equipment.price.toStringAsFixed(2)}'),
+                    trailing: Text('\$${equipment.ratePerHour.toStringAsFixed(2)}'),
                     onTap: () {
                       Navigator.push(
                         context,

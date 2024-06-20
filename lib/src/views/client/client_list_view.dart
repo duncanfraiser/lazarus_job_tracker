@@ -3,7 +3,6 @@ import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_create_update_view.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
-import 'package:provider/provider.dart';
 
 class ClientListView extends StatefulWidget {
   const ClientListView({super.key});

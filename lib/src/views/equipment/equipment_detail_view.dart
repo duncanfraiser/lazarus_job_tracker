@@ -47,8 +47,8 @@ class EquipmentDetailView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: const Text('Price'),
-                subtitle: Text('\$${equipment.price.toStringAsFixed(2)}'),
+                title: const Text('Rate per Hour'),
+                subtitle: Text('\$${equipment.ratePerHour.toStringAsFixed(2)}'),
               ),
             ),
             const SizedBox(height: 16.0),
@@ -69,3 +69,4 @@ class EquipmentDetailView extends StatelessWidget {
     );
   }
 }
+

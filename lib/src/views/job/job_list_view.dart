@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_detail_view.dart';
+import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart'; // Import the JobCreateUpdateView
 import 'package:provider/provider.dart';
 
 class JobListView extends StatelessWidget {
@@ -14,6 +15,19 @@ class JobListView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Jobs'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const JobCreateUpdateView(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<List<JobModel>>(
         stream: jobService.getJobs(),

@@ -16,21 +16,21 @@ class _EquipmentCreateUpdateViewState extends State<EquipmentCreateUpdateView> {
   final EquipmentService _equipmentService = EquipmentService();
 
   late TextEditingController _nameController;
-  late TextEditingController _priceController;
+  late TextEditingController _ratePerHourController;
   late TextEditingController _descriptionController;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.equipment?.name ?? '');
-    _priceController = TextEditingController(text: widget.equipment?.price.toString() ?? '');
+    _ratePerHourController = TextEditingController(text: widget.equipment?.ratePerHour.toString() ?? '');
     _descriptionController = TextEditingController(text: widget.equipment?.description ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _priceController.dispose();
+    _ratePerHourController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -39,14 +39,14 @@ class _EquipmentCreateUpdateViewState extends State<EquipmentCreateUpdateView> {
     if (_formKey.currentState!.validate()) {
       try {
         final name = _nameController.text;
-        final price = double.parse(_priceController.text);
+        final ratePerHour = double.parse(_ratePerHourController.text);
         final description = _descriptionController.text;
 
         if (widget.equipment == null) {
           // Create new equipment
           await _equipmentService.addEquipment(EquipmentModel(
             name: name,
-            price: price,
+            ratePerHour: ratePerHour,
             description: description,
           ));
         } else {
@@ -54,7 +54,7 @@ class _EquipmentCreateUpdateViewState extends State<EquipmentCreateUpdateView> {
           await _equipmentService.updateEquipment(EquipmentModel(
             documentId: widget.equipment!.documentId,
             name: name,
-            price: price,
+            ratePerHour: ratePerHour,
             description: description,
           ));
         }
@@ -125,12 +125,12 @@ class _EquipmentCreateUpdateViewState extends State<EquipmentCreateUpdateView> {
                 },
               ),
               TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(labelText: 'Price'),
+                controller: _ratePerHourController,
+                decoration: const InputDecoration(labelText: 'Rate per Hour'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
+                    return 'Please enter a rate per hour';
                   }
                   if (double.tryParse(value) == null) {
                     return 'Please enter a valid number';

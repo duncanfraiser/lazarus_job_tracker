@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class EquipmentModel {
   String? documentId; // firestore document ID
   String name;
-  double price;
+  double ratePerHour;
   String description;
   // Add other useful properties as needed
 
@@ -11,7 +11,7 @@ class EquipmentModel {
   EquipmentModel({
     this.documentId,
     required this.name,
-    required this.price,
+    required this.ratePerHour,
     required this.description,
     // Initialize other properties
   });
@@ -21,7 +21,7 @@ class EquipmentModel {
     return EquipmentModel(
       documentId: id,
       name: json['name'],
-      price: json['price'],
+      ratePerHour: json['ratePerHour'],
       description: json['description'],
       // Initialize other properties
     );
@@ -31,7 +31,7 @@ class EquipmentModel {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'price': price,
+      'ratePerHour': ratePerHour,
       'description': description,
       // Convert other properties
     };

@@ -46,18 +46,6 @@ class JobDetailView extends StatelessWidget {
               },
               child: const Text('Edit Job'),
             ),
-            const SizedBox(height: 8.0),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const JobCreateUpdateView(),
-                  ),
-                );
-              },
-              child: const Text('Create New Job'),
-            ),
             const SizedBox(height: 16.0),
             Text('Client', style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8.0),
@@ -117,7 +105,7 @@ class JobDetailView extends StatelessWidget {
                       ),
                       child: ListTile(
                         title: Text(equipment.name),
-                        subtitle: Text('Price: \$${equipment.price.toStringAsFixed(2)}'),
+                        subtitle: Text('Rate per Hour: \$${equipment.ratePerHour.toStringAsFixed(2)}'),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -187,7 +175,7 @@ class JobDetailView extends StatelessWidget {
       documentId: id,
       name: 'Unknown',
       description: 'No description available',
-      price: 0.0,
+      ratePerHour: 0.0,
     )).toList());
   }
 

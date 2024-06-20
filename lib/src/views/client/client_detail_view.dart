@@ -24,7 +24,7 @@ class ClientDetailView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('Name'),
+                title: const Text('Name'),
                 subtitle: Text('${client.fName} ${client.lName}'),
               ),
             ),
@@ -35,7 +35,7 @@ class ClientDetailView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('Email'),
+                title: const Text('Email'),
                 subtitle: Text(client.email),
               ),
             ),
@@ -46,7 +46,7 @@ class ClientDetailView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('Phone'),
+                title: const Text('Phone'),
                 subtitle: Text(client.phone),
               ),
             ),
@@ -57,7 +57,7 @@ class ClientDetailView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: ListTile(
-                title: Text('Address'),
+                title: const Text('Address'),
                 subtitle: Text(client.billingAddress),
               ),
             ),

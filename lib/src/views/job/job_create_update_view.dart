@@ -168,7 +168,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   Future<void> _addNewEquipment(BuildContext context, EquipmentService equipmentService) async {
     final newEquipmentNameController = TextEditingController();
     final newEquipmentDescriptionController = TextEditingController();
-    final newEquipmentPriceController = TextEditingController();
+    final newEquipmentRatePerHourController = TextEditingController();
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -181,12 +181,12 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
               decoration: const InputDecoration(labelText: 'Equipment Name'),
             ),
             TextFormField(
-              controller: newEquipmentPriceController,
-              decoration: const InputDecoration(labelText: 'Price'),
+              controller: newEquipmentRatePerHourController,
+              decoration: const InputDecoration(labelText: 'Rate Per Hour'),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter a price';
+                  return 'Please enter a rate per hour';
                 }
                 if (double.tryParse(value) == null) {
                   return 'Please enter a valid number';
@@ -209,13 +209,13 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             onPressed: () async {
               final name = newEquipmentNameController.text;
               final description = newEquipmentDescriptionController.text;
-              final price = double.tryParse(newEquipmentPriceController.text) ?? 0.0;
+              final ratePerHour = double.tryParse(newEquipmentRatePerHourController.text) ?? 0.0;
               if (name.isNotEmpty && description.isNotEmpty) {
                 final newEquipment = EquipmentModel(
                   documentId: '', // Firebase will generate this automatically
                   name: name,
                   description: description, 
-                  price: price,
+                  ratePerHour: ratePerHour,
                 );
                 final docRef = await equipmentService.addEquipment(newEquipment);
                 if (mounted) {
@@ -588,7 +588,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   final equipment = _equipmentDetails[id];
                   return ListTile(
                     title: Text(equipment?.name ?? 'Loading...'),
-                    subtitle: Text('Price: \$${equipment?.price.toStringAsFixed(2) ?? 'Loading...'}'),
+                    subtitle: Text('Rate per Hour: \$${equipment?.ratePerHour.toStringAsFixed(2) ?? 'Loading...'}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
