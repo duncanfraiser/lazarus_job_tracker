@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/material_model.dart';
 import 'package:lazarus_job_tracker/src/services/material_service.dart';
 import 'package:lazarus_job_tracker/src/views/material/material_create_update_view.dart';
+import 'package:lazarus_job_tracker/src/views/material/material_detail_view.dart'; // Import MaterialDetailView
 
 class MaterialListView extends StatefulWidget {
   const MaterialListView({super.key});
@@ -58,9 +59,9 @@ class _MaterialListViewState extends State<MaterialListView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MaterialCreateUpdateView(material: material),
+                          builder: (context) => MaterialDetailView(material: material), // Navigate to MaterialDetailView
                         ),
-                      ).then((value) => setState(() {})); // Refresh list after returning
+                      );
                     },
                     onLongPress: () async {
                       // Optionally, add a delete confirmation dialog
