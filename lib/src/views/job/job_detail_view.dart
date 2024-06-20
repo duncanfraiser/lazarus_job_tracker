@@ -6,8 +6,8 @@ import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:lazarus_job_tracker/src/views/equipment/equipment_usage_dialog.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart';
-import 'package:lazarus_job_tracker/src/views/equipment/equipment_detail_view.dart';
 import 'package:lazarus_job_tracker/src/views/material/material_detail_view.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
 import 'package:provider/provider.dart';
@@ -106,13 +106,21 @@ class JobDetailView extends StatelessWidget {
                       child: ListTile(
                         title: Text(equipment.name),
                         subtitle: Text('Rate per Hour: \$${equipment.ratePerHour.toStringAsFixed(2)}'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EquipmentDetailView(equipment: equipment),
+                        onTap: () async {
+                          final usage = job.equipmentUsage[equipment.documentId!] ?? [];
+                          final result = await showDialog<List<EquipmentUsage>>(
+                            context: context,
+                            builder: (context) => EquipmentUsageDialog(
+                              equipment: equipment,
+                              usage: usage,
                             ),
                           );
+
+                          if (result != null) {
+                            // Update the job's equipment usage and save it to the database
+                            job.equipmentUsage[equipment.documentId!] = result;
+                            // Save job to Firestore here
+                          }
                         },
                       ),
                     );

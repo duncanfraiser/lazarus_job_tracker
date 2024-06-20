@@ -110,6 +110,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             equipmentIds: _selectedEquipmentIds,
             materialIds: _selectedMaterialIds,
             clientId: _selectedClientId,
+            equipmentUsage: {}, // Initialize empty map for new job
           ));
         } else {
           // Update existing job
@@ -120,6 +121,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             equipmentIds: _selectedEquipmentIds,
             materialIds: _selectedMaterialIds,
             clientId: _selectedClientId,
+            equipmentUsage: widget.job!.equipmentUsage, // Use existing equipment usage
           ));
         }
 
@@ -236,76 +238,77 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     );
   }
 
-  Future<void> _addNewMaterial(BuildContext context, MaterialService materialService) async {
-    final newMaterialNameController = TextEditingController();
-    final newMaterialDescriptionController = TextEditingController();
-    final newMaterialPriceController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add New Material'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: newMaterialNameController,
-              decoration: const InputDecoration(labelText: 'Material Name'),
-            ),
-            TextFormField(
-              controller: newMaterialPriceController,
-              decoration: const InputDecoration(labelText: 'Price'),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a price';
-                }
-                if (double.tryParse(value) == null) {
-                  return 'Please enter a valid number';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: newMaterialDescriptionController,
-              decoration: const InputDecoration(labelText: 'Material Description'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+Future<void> _addNewMaterial(BuildContext context, MaterialService materialService) async {
+  final newMaterialNameController = TextEditingController();
+  final newMaterialDescriptionController = TextEditingController();
+  final newMaterialPriceController = TextEditingController();
+  await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Add New Material'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: newMaterialNameController,
+            decoration: const InputDecoration(labelText: 'Material Name'),
           ),
-          TextButton(
-            onPressed: () async {
-              final name = newMaterialNameController.text;
-              final description = newMaterialDescriptionController.text;
-              final price = double.tryParse(newMaterialPriceController.text) ?? 0.0;
-              if (name.isNotEmpty && description.isNotEmpty) {
-                final newMaterial = MaterialModel(
-                  documentId: '', // Firebase will generate this automatically
-                  name: name,
-                  description: description, 
-                  price: price,
-                );
-                final docRef = await materialService.addMaterial(newMaterial);
-                if (mounted) {
-                  setState(() {
-                    _selectedMaterialIds.add(docRef.id);
-                    _materialDetails[docRef.id] = newMaterial;
-                  });
-                }
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
+          TextFormField(
+            controller: newMaterialPriceController,
+            decoration: const InputDecoration(labelText: 'Price'),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a price';
               }
+              if (double.tryParse(value) == null) {
+                return 'Please enter a valid number';
+              }
+              return null;
             },
-            child: const Text('Add'),
+          ),
+          TextFormField(
+            controller: newMaterialDescriptionController,
+            decoration: const InputDecoration(labelText: 'Material Description'),
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+            final name = newMaterialNameController.text;
+            final description = newMaterialDescriptionController.text;
+            final price = double.tryParse(newMaterialPriceController.text) ?? 0.0;
+            if (name.isNotEmpty && description.isNotEmpty) {
+              final newMaterial = MaterialModel(
+                documentId: '', // Firebase will generate this automatically
+                name: name,
+                description: description,
+                price: price,
+              );
+              final docRef = await materialService.addMaterial(newMaterial);
+              if (mounted) {
+                setState(() {
+                  _selectedMaterialIds.add(docRef.id);
+                  _materialDetails[docRef.id] = newMaterial;
+                });
+              }
+              if (mounted) {
+                Navigator.of(context).pop();
+              }
+            }
+          },
+          child: const Text('Add'),
+        ),
+      ],
+    ),
+  );
+}
+
 
   Future<void> _selectEquipment(String id, EquipmentService equipmentService) async {
     final equipment = await equipmentService.getEquipmentById(id);
