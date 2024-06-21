@@ -4,14 +4,15 @@ import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
-import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
-import 'package:lazarus_job_tracker/src/services/job_service.dart'; // Import JobService to update job in database
+import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_usage_dialog.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart';
 import 'package:lazarus_job_tracker/src/views/job_material/job_material_detail_view.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
 import 'package:provider/provider.dart';
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_usage_dialog.dart';
 
 class JobDetailView extends StatefulWidget {
   final JobModel job;
@@ -28,7 +29,7 @@ class _JobDetailViewState extends State<JobDetailView> {
     final equipmentService = Provider.of<EquipmentService>(context, listen: false);
     final materialService = Provider.of<JobMaterialService>(context, listen: false);
     final clientService = Provider.of<ClientService>(context, listen: false);
-    final jobService = Provider.of<JobService>(context, listen: false); // Get JobService
+    final jobService = Provider.of<JobService>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -163,24 +164,45 @@ class _JobDetailViewState extends State<JobDetailView> {
                   return const Text('No materials found');
                 }
 
-                final materialList = snapshot.data!;
+                final jobMaterialList = snapshot.data!;
                 return Column(
-                  children: materialList.map((material) {
+                  children: jobMaterialList.map((jobMaterial) {
+                    final usage = widget.job.jobMaterialUsage[jobMaterial.documentId] ?? [];
+                    final totalQuantity = usage.fold<double>(0, (sum, item) => sum + item.quantity);
+                    final totalCost = totalQuantity * jobMaterial.price;
+
                     return Card(
                       elevation: 4.0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: ListTile(
-                        title: Text(material.name),
-                        subtitle: Text('Price: \$${material.price.toStringAsFixed(2)}'),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => JobMaterialDetailView(jobMaterial: material),
+                        title: Text(jobMaterial.name),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Price: \$${jobMaterial.price.toStringAsFixed(2)}'),
+                            Text('Total Quantity: ${totalQuantity.toStringAsFixed(2)}'),
+                            Text('Total Cost: \$${totalCost.toStringAsFixed(2)}'),
+                          ],
+                        ),
+                        onTap: () async {
+                          final result = await showDialog<List<JobMaterialUsage>>(
+                            context: context,
+                            builder: (context) => JobMaterialUsageDialog(
+                              jobMaterialName: jobMaterial.name,
+                              usage: usage,
                             ),
                           );
+
+                          if (result != null) {
+                            setState(() {
+                              if (jobMaterial.documentId != null) {
+                                widget.job.jobMaterialUsage[jobMaterial.documentId!] = result;
+                              }
+                            });
+                            await jobService.updateJob(widget.job); // Save job to Firestore
+                          }
                         },
                       ),
                     );

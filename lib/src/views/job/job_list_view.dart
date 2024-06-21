@@ -15,6 +15,12 @@ class JobListView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Jobs'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_usage_dialog.dart';
 
 class JobModel {
   final String documentId;
@@ -8,8 +9,8 @@ class JobModel {
   final List<String> jobMaterialIds;
   final String? clientId;
   final Map<String, List<EquipmentUsage>> equipmentUsage;
+  final Map<String, List<JobMaterialUsage>> jobMaterialUsage; // Add this field
 
-  // Constructor
   JobModel({
     required this.documentId,
     required this.name,
@@ -18,9 +19,10 @@ class JobModel {
     required this.jobMaterialIds,
     this.clientId,
     Map<String, List<EquipmentUsage>>? equipmentUsage,
-  }) : equipmentUsage = equipmentUsage ?? {};
+    Map<String, List<JobMaterialUsage>>? jobMaterialUsage, // Add this field
+  })  : equipmentUsage = equipmentUsage ?? {},
+        jobMaterialUsage = jobMaterialUsage ?? {}; // Initialize
 
-  // From JSON
   factory JobModel.fromJson(Map<String, dynamic> json, String id) {
     return JobModel(
       documentId: id,
@@ -29,11 +31,15 @@ class JobModel {
       equipmentIds: List<String>.from(json['equipmentIds'] ?? []),
       jobMaterialIds: List<String>.from(json['materialIds'] ?? []),
       clientId: json['clientId'],
-      equipmentUsage: (json['equipmentUsage'] as Map<String, dynamic>?)?.map((k, v) => MapEntry(k, List<EquipmentUsage>.from((v as List).map((e) => EquipmentUsage.fromJson(e))))) ?? {},
+      equipmentUsage: (json['equipmentUsage'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, List<EquipmentUsage>.from((v as List).map((e) => EquipmentUsage.fromJson(e)))))
+          ?? {},
+      jobMaterialUsage: (json['jobMaterialUsage'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, List<JobMaterialUsage>.from((v as List).map((e) => JobMaterialUsage.fromJson(e)))))
+          ?? {}, // Add this field
     );
   }
 
-  // To JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -42,10 +48,10 @@ class JobModel {
       'materialIds': jobMaterialIds,
       'clientId': clientId,
       'equipmentUsage': equipmentUsage.map((k, v) => MapEntry(k, v.map((e) => e.toJson()).toList())),
+      'jobMaterialUsage': jobMaterialUsage.map((k, v) => MapEntry(k, v.map((e) => e.toJson()).toList())), // Add this field
     };
   }
 
-  // From Firestore Document
   factory JobModel.fromDocument(DocumentSnapshot doc) {
     return JobModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
   }

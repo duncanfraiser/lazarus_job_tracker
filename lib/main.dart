@@ -1,26 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
+import 'package:lazarus_job_tracker/src/views/home/home_view.dart';
+import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:lazarus_job_tracker/src/services/job_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
-import 'package:lazarus_job_tracker/src/services/job_service.dart';
-import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
-import 'firebase_options.dart';
-
-import 'src/app.dart';
-import 'package:provider/provider.dart';
-import 'src/views/auth/auth_view_model.dart';
 
 
 void main() async {
-  // Ensure Flutter binding is initialized.
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
-  // Initialize Firebase.
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Run the app.
   runApp(
     MultiProvider(
       providers: [
@@ -33,4 +25,20 @@ void main() async {
       child: const MyApp(),
     ),
   );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Job Tracker',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: HomeView(),
+    );
+  }
 }

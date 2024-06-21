@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
-import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
 import 'package:lazarus_job_tracker/src/views/job_material/job_material_create_update_view.dart';
-import 'package:lazarus_job_tracker/src/views/job_material/job_material_detail_view.dart'; // Import MaterialDetailView
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_detail_view.dart';
 
 class JobMaterialListView extends StatefulWidget {
   const JobMaterialListView({super.key});
@@ -59,7 +59,7 @@ class _JobMaterialListViewState extends State<JobMaterialListView> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => JobMaterialDetailView(jobMaterial: jobMaterial), // Navigate to MaterialDetailView
+                          builder: (context) => JobMaterialDetailView(jobMaterial: jobMaterial),
                         ),
                       );
                     },

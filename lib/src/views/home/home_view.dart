@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lazarus_job_tracker/src/views/auth/user_list_view.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_list_view.dart';
@@ -7,6 +8,7 @@ import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/job_material/job_material_list_view.dart';
+
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -186,6 +188,28 @@ class HomeView extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Center(child: Text('Material', style: Theme.of(context).textTheme.titleLarge)),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                          width: cardWidth,
+                          child: Card(
+                            elevation: 4.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const UserListView()),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Center(child: Text('Users', style: Theme.of(context).textTheme.titleLarge)),
                               ),
                             ),
                           ),

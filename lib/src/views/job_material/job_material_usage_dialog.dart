@@ -1,24 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import the intl package
-import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
-import 'package:lazarus_job_tracker/src/models/job_model.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class EquipmentUsageDialog extends StatefulWidget {
-  final EquipmentModel equipment;
-  final List<EquipmentUsage> usage;
+class JobMaterialUsage {
+  final DateTime date;
+  final double quantity;
 
-  const EquipmentUsageDialog({super.key, 
-    required this.equipment,
+  JobMaterialUsage({
+    required this.date,
+    required this.quantity,
+  });
+
+  factory JobMaterialUsage.fromJson(Map<String, dynamic> json) {
+    return JobMaterialUsage(
+      date: (json['date'] as Timestamp).toDate(),
+      quantity: json['quantity'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'quantity': quantity,
+    };
+  }
+}
+
+class JobMaterialUsageDialog extends StatefulWidget {
+  final String jobMaterialName;
+  final List<JobMaterialUsage> usage;
+
+  const JobMaterialUsageDialog({
+    required this.jobMaterialName,
     required this.usage,
   });
 
   @override
-  _EquipmentUsageDialogState createState() => _EquipmentUsageDialogState();
+  _JobMaterialUsageDialogState createState() => _JobMaterialUsageDialogState();
 }
 
-class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
-  final List<EquipmentUsage> _usage = [];
-  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd'); // Define the date format
+class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
+  final List<JobMaterialUsage> _usage = [];
+  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
@@ -29,16 +52,16 @@ class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Usage for ${widget.equipment.name}'),
+      title: Text('Usage for ${widget.jobMaterialName}'),
       content: SingleChildScrollView(
         child: Column(
           children: [
             for (var entry in _usage)
               ListTile(
                 title: Text('Date: ${_dateFormat.format(entry.date)}'),
-                subtitle: Text('Hours: ${entry.hours}'),
+                subtitle: Text('Quantity: ${entry.quantity}'),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete),
+                  icon: Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
                       _usage.remove(entry);
@@ -48,7 +71,7 @@ class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
               ),
             ElevatedButton(
               onPressed: _addNewEntry,
-              child: const Text('Add New Entry'),
+              child: Text('Add New Entry'),
             ),
           ],
         ),
@@ -56,11 +79,11 @@ class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(_usage),
-          child: const Text('Save'),
+          child: Text('Save'),
         ),
       ],
     );
@@ -68,18 +91,18 @@ class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
 
   void _addNewEntry() async {
     final dateController = TextEditingController();
-    final hoursController = TextEditingController();
+    final quantityController = TextEditingController();
 
     final result = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Usage Entry'),
+        title: Text('Add New Usage Entry'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
               controller: dateController,
-              decoration: const InputDecoration(labelText: 'Date (yyyy-MM-dd)'),
+              decoration: InputDecoration(labelText: 'Date (yyyy-MM-dd)'),
               onTap: () async {
                 FocusScope.of(context).requestFocus(FocusNode());
                 final DateTime? picked = await showDatePicker(
@@ -94,8 +117,8 @@ class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
               },
             ),
             TextFormField(
-              controller: hoursController,
-              decoration: const InputDecoration(labelText: 'Hours'),
+              controller: quantityController,
+              decoration: InputDecoration(labelText: 'Quantity'),
               keyboardType: TextInputType.number,
             ),
           ],
@@ -103,29 +126,29 @@ class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
-              if (dateController.text.isNotEmpty && hoursController.text.isNotEmpty) {
+              if (dateController.text.isNotEmpty && quantityController.text.isNotEmpty) {
                 try {
-                  final date = _dateFormat.parse(dateController.text); // Parse the date using the defined format
-                  final hours = double.parse(hoursController.text);
-                  Navigator.of(context).pop(EquipmentUsage(date: date, hours: hours));
+                  final date = _dateFormat.parse(dateController.text);
+                  final quantity = double.parse(quantityController.text);
+                  Navigator.of(context).pop(JobMaterialUsage(date: date, quantity: quantity));
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Error: Invalid date or hours format')),
+                    SnackBar(content: Text('Error: Invalid date or quantity format')),
                   );
                 }
               }
             },
-            child: const Text('Add'),
+            child: Text('Add'),
           ),
         ],
       ),
     );
 
-    if (result != null && result is EquipmentUsage) {
+    if (result != null && result is JobMaterialUsage) {
       setState(() {
         _usage.add(result);
       });
