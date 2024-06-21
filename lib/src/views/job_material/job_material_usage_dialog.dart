@@ -30,7 +30,7 @@ class JobMaterialUsageDialog extends StatefulWidget {
   final String jobMaterialName;
   final List<JobMaterialUsage> usage;
 
-  const JobMaterialUsageDialog({
+  const JobMaterialUsageDialog({super.key, 
     required this.jobMaterialName,
     required this.usage,
   });
@@ -61,7 +61,7 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
                 title: Text('Date: ${_dateFormat.format(entry.date)}'),
                 subtitle: Text('Quantity: ${entry.quantity}'),
                 trailing: IconButton(
-                  icon: Icon(Icons.delete),
+                  icon: const Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
                       _usage.remove(entry);
@@ -71,7 +71,7 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
               ),
             ElevatedButton(
               onPressed: _addNewEntry,
-              child: Text('Add New Entry'),
+              child: const Text('Add New Entry'),
             ),
           ],
         ),
@@ -79,11 +79,11 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(_usage),
-          child: Text('Save'),
+          child: const Text('Save'),
         ),
       ],
     );
@@ -96,13 +96,13 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
     final result = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Add New Usage Entry'),
+        title: const Text('Add New Usage Entry'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
               controller: dateController,
-              decoration: InputDecoration(labelText: 'Date (yyyy-MM-dd)'),
+              decoration: const InputDecoration(labelText: 'Date (yyyy-MM-dd)'),
               onTap: () async {
                 FocusScope.of(context).requestFocus(FocusNode());
                 final DateTime? picked = await showDatePicker(
@@ -118,7 +118,7 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
             ),
             TextFormField(
               controller: quantityController,
-              decoration: InputDecoration(labelText: 'Quantity'),
+              decoration: const InputDecoration(labelText: 'Quantity'),
               keyboardType: TextInputType.number,
             ),
           ],
@@ -126,7 +126,7 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -137,12 +137,12 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
                   Navigator.of(context).pop(JobMaterialUsage(date: date, quantity: quantity));
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: Invalid date or quantity format')),
+                    const SnackBar(content: Text('Error: Invalid date or quantity format')),
                   );
                 }
               }
             },
-            child: Text('Add'),
+            child: const Text('Add'),
           ),
         ],
       ),

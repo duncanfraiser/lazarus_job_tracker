@@ -9,7 +9,6 @@ import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_usage_dialog.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart';
-import 'package:lazarus_job_tracker/src/views/job_material/job_material_detail_view.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
 import 'package:provider/provider.dart';
 import 'package:lazarus_job_tracker/src/views/job_material/job_material_usage_dialog.dart';

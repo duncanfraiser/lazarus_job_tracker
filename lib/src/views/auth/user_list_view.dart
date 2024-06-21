@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lazarus_job_tracker/src/services/auth_service.dart';
 
 class UserListView extends StatelessWidget {
-  const UserListView({Key? key}) : super(key: key);
+  const UserListView({super.key});
 
   Future<List<Map<String, dynamic>>> _getUsers() async {
     final QuerySnapshot result = await FirebaseFirestore.instance.collection('employees').get();
