@@ -6,7 +6,7 @@ import 'package:lazarus_job_tracker/src/services/auth_service.dart';
 import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_list_view.dart';
-import 'package:lazarus_job_tracker/src/views/material/material_list_view.dart';
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_list_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -180,7 +180,7 @@ class HomeView extends StatelessWidget {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const MaterialListView()),
+                                  MaterialPageRoute(builder: (context) => const JobMaterialListView()),
                                 );
                               },
                               child: Padding(

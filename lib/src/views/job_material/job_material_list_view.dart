@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/models/material_model.dart';
-import 'package:lazarus_job_tracker/src/services/material_service.dart';
-import 'package:lazarus_job_tracker/src/views/material/material_create_update_view.dart';
-import 'package:lazarus_job_tracker/src/views/material/material_detail_view.dart'; // Import MaterialDetailView
+import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
+import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_create_update_view.dart';
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_detail_view.dart'; // Import MaterialDetailView
 
-class MaterialListView extends StatefulWidget {
-  const MaterialListView({super.key});
+class JobMaterialListView extends StatefulWidget {
+  const JobMaterialListView({super.key});
 
   @override
-  _MaterialListViewState createState() => _MaterialListViewState();
+  _JobMaterialListViewState createState() => _JobMaterialListViewState();
 }
 
-class _MaterialListViewState extends State<MaterialListView> {
-  final MaterialService _materialService = MaterialService();
+class _JobMaterialListViewState extends State<JobMaterialListView> {
+  final JobMaterialService _jobMaterialService = JobMaterialService();
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +25,14 @@ class _MaterialListViewState extends State<MaterialListView> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const MaterialCreateUpdateView()),
+                MaterialPageRoute(builder: (context) => const JobMaterialCreateUpdateView()),
               ).then((value) => setState(() {})); // Refresh list after returning
             },
           ),
         ],
       ),
-      body: FutureBuilder<List<MaterialModel>>(
-        future: _materialService.getAllMaterial(),
+      body: FutureBuilder<List<JobMaterialModel>>(
+        future: _jobMaterialService.getJobAllMaterial(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -41,25 +41,25 @@ class _MaterialListViewState extends State<MaterialListView> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No material found'));
           } else {
-            final materialList = snapshot.data!;
+            final jobMaterialList = snapshot.data!;
             return ListView.builder(
-              itemCount: materialList.length,
+              itemCount: jobMaterialList.length,
               itemBuilder: (context, index) {
-                final material = materialList[index];
+                final jobMaterial = jobMaterialList[index];
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
                     title: Text(
-                      material.name,
+                      jobMaterial.name,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text(material.description),
-                    trailing: Text('\$${material.price.toStringAsFixed(2)}'),
+                    subtitle: Text(jobMaterial.description),
+                    trailing: Text('\$${jobMaterial.price.toStringAsFixed(2)}'),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MaterialDetailView(material: material), // Navigate to MaterialDetailView
+                          builder: (context) => JobMaterialDetailView(jobMaterial: jobMaterial), // Navigate to MaterialDetailView
                         ),
                       );
                     },
@@ -84,7 +84,7 @@ class _MaterialListViewState extends State<MaterialListView> {
                       );
 
                       if (confirmDelete == true) {
-                        await _materialService.deleteMaterial(material.documentId!);
+                        await _jobMaterialService.deleteJobMaterial(jobMaterial.documentId!);
                         setState(() {});
                       }
                     },

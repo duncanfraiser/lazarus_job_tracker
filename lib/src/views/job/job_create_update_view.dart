@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
-import 'package:lazarus_job_tracker/src/models/material_model.dart';
+import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
-import 'package:lazarus_job_tracker/src/services/material_service.dart';
+import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
 import 'package:provider/provider.dart';
 
 class JobCreateUpdateView extends StatefulWidget {
@@ -26,8 +26,8 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   late TextEditingController _instructionsController;
   List<String> _selectedEquipmentIds = [];
   final Map<String, EquipmentModel> _equipmentDetails = {};
-  List<String> _selectedMaterialIds = [];
-  final Map<String, MaterialModel> _materialDetails = {};
+  List<String> _selectedJobMaterialIds = [];
+  final Map<String, JobMaterialModel> _jobMaterialDetails = {};
   String? _selectedClientId;
   ClientModel? _selectedClient;
 
@@ -37,11 +37,11 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _nameController = TextEditingController(text: widget.job?.name ?? '');
     _instructionsController = TextEditingController(text: widget.job?.instructions ?? '');
     _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
-    _selectedMaterialIds = widget.job?.materialIds ?? [];
+    _selectedJobMaterialIds = widget.job?.jobMaterialIds ?? [];
     _selectedClientId = widget.job?.clientId;
     _loadSelectedClient();
     _loadSelectedEquipmentDetails();
-    _loadSelectedMaterialDetails();
+    _loadSelectedJobMaterialDetails();
   }
 
   @override
@@ -79,15 +79,15 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     }
   }
 
-  Future<void> _loadSelectedMaterialDetails() async {
-    if (_selectedMaterialIds.isNotEmpty) {
-      final materialService = Provider.of<MaterialService>(context, listen: false);
-      for (var id in _selectedMaterialIds) {
-        final material = await materialService.getMaterialById(id);
+  Future<void> _loadSelectedJobMaterialDetails() async {
+    if (_selectedJobMaterialIds.isNotEmpty) {
+      final jobMaterialService = Provider.of<JobMaterialService>(context, listen: false);
+      for (var id in _selectedJobMaterialIds) {
+        final jobMaterial = await jobMaterialService.getJobMaterialById(id);
         if (mounted) {
           setState(() {
-            if (material != null) {
-              _materialDetails[id] = material;
+            if (jobMaterial != null) {
+              _jobMaterialDetails[id] = jobMaterial;
             }
           });
         }
@@ -108,7 +108,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             name: name,
             instructions: instructions,
             equipmentIds: _selectedEquipmentIds,
-            materialIds: _selectedMaterialIds,
+            jobMaterialIds: _selectedJobMaterialIds,
             clientId: _selectedClientId,
             equipmentUsage: {}, // Initialize empty map for new job
           ));
@@ -119,7 +119,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             name: name,
             instructions: instructions,
             equipmentIds: _selectedEquipmentIds,
-            materialIds: _selectedMaterialIds,
+            jobMaterialIds: _selectedJobMaterialIds,
             clientId: _selectedClientId,
             equipmentUsage: widget.job!.equipmentUsage, // Use existing equipment usage
           ));
@@ -238,10 +238,10 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     );
   }
 
-Future<void> _addNewMaterial(BuildContext context, MaterialService materialService) async {
-  final newMaterialNameController = TextEditingController();
-  final newMaterialDescriptionController = TextEditingController();
-  final newMaterialPriceController = TextEditingController();
+Future<void> _addJobNewMaterial(BuildContext context, JobMaterialService jobMaterialService) async {
+  final newJobMaterialNameController = TextEditingController();
+  final newJobMaterialDescriptionController = TextEditingController();
+  final newJobMaterialPriceController = TextEditingController();
   await showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -250,11 +250,11 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
         mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
-            controller: newMaterialNameController,
+            controller: newJobMaterialNameController,
             decoration: const InputDecoration(labelText: 'Material Name'),
           ),
           TextFormField(
-            controller: newMaterialPriceController,
+            controller: newJobMaterialPriceController,
             decoration: const InputDecoration(labelText: 'Price'),
             keyboardType: TextInputType.number,
             validator: (value) {
@@ -268,7 +268,7 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
             },
           ),
           TextFormField(
-            controller: newMaterialDescriptionController,
+            controller: newJobMaterialDescriptionController,
             decoration: const InputDecoration(labelText: 'Material Description'),
           ),
         ],
@@ -280,21 +280,21 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
         ),
         TextButton(
           onPressed: () async {
-            final name = newMaterialNameController.text;
-            final description = newMaterialDescriptionController.text;
-            final price = double.tryParse(newMaterialPriceController.text) ?? 0.0;
+            final name = newJobMaterialNameController.text;
+            final description = newJobMaterialDescriptionController.text;
+            final price = double.tryParse(newJobMaterialPriceController.text) ?? 0.0;
             if (name.isNotEmpty && description.isNotEmpty) {
-              final newMaterial = MaterialModel(
+              final newJobMaterial = JobMaterialModel(
                 documentId: '', // Firebase will generate this automatically
                 name: name,
                 description: description,
                 price: price,
               );
-              final docRef = await materialService.addMaterial(newMaterial);
+              final docRef = await jobMaterialService.addJobMaterial(newJobMaterial);
               if (mounted) {
                 setState(() {
-                  _selectedMaterialIds.add(docRef.id);
-                  _materialDetails[docRef.id] = newMaterial;
+                  _selectedJobMaterialIds.add(docRef.id);
+                  _jobMaterialDetails[docRef.id] = newJobMaterial;
                 });
               }
               if (mounted) {
@@ -320,12 +320,12 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
     }
   }
 
-  Future<void> _selectMaterial(String id, MaterialService materialService) async {
-    final material = await materialService.getMaterialById(id);
+  Future<void> _selectJobMaterial(String id, JobMaterialService jobMaterialService) async {
+    final jobMaterial = await jobMaterialService.getJobMaterialById(id);
     if (mounted) {
       setState(() {
-        _selectedMaterialIds.add(id);
-        _materialDetails[id] = material!;
+        _selectedJobMaterialIds.add(id);
+        _jobMaterialDetails[id] = jobMaterial!;
       });
     }
   }
@@ -419,7 +419,7 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
   Widget build(BuildContext context) {
     final equipmentService = Provider.of<EquipmentService>(context);
     final clientService = Provider.of<ClientService>(context);
-    final materialService = Provider.of<MaterialService>(context);
+    final jobMaterialService = Provider.of<JobMaterialService>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -540,11 +540,11 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
                   );
                 },
               ),
-              StreamBuilder<List<MaterialModel>>(
-                stream: materialService.getMaterials(),
+              StreamBuilder<List<JobMaterialModel>>(
+                stream: jobMaterialService.getJobMaterials(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return const CircularProgressIndicator();
-                  final materialList = snapshot.data!;
+                  final jobMaterialList = snapshot.data!;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -553,27 +553,27 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
                         decoration: const InputDecoration(labelText: 'Select Material'),
                         items: [
                           DropdownMenuItem<String>(
-                            value: 'addNewMaterial',
+                            value: 'addNewJobMaterial',
                             child: Text('Add New Material', style: TextStyle(color: Theme.of(context).primaryColor)),
                           ),
-                          ...materialList.map((material) {
+                          ...jobMaterialList.map((jobMaterial) {
                             return DropdownMenuItem<String>(
-                              value: material.documentId,
+                              value: jobMaterial.documentId,
                               child: Row(
                                 children: [
-                                  if (_selectedMaterialIds.contains(material.documentId)) 
+                                  if (_selectedJobMaterialIds.contains(jobMaterial.documentId)) 
                                     const Icon(Icons.check, color: Colors.green),
-                                  Text(material.name),
+                                  Text(jobMaterial.name),
                                 ],
                               ),
                             );
                           }),
                         ],
                         onChanged: (value) {
-                          if (value != null && value == 'addNewMaterial') {
-                            _addNewMaterial(context, materialService);
-                          } else if (value != null && !_selectedMaterialIds.contains(value)) {
-                            _selectMaterial(value, materialService);
+                          if (value != null && value == 'addJobNewMaterial') {
+                            _addJobNewMaterial(context, jobMaterialService);
+                          } else if (value != null && !_selectedJobMaterialIds.contains(value)) {
+                            _selectJobMaterial(value, jobMaterialService);
                           }
                         },
                       ),
@@ -608,19 +608,19 @@ Future<void> _addNewMaterial(BuildContext context, MaterialService materialServi
               Text('Selected Materials', style: Theme.of(context).textTheme.bodyLarge),
               ListView.builder(
                 shrinkWrap: true,
-                itemCount: _selectedMaterialIds.length,
+                itemCount: _selectedJobMaterialIds.length,
                 itemBuilder: (context, index) {
-                  final id = _selectedMaterialIds[index];
-                  final material = _materialDetails[id];
+                  final id = _selectedJobMaterialIds[index];
+                  final jobMaterial = _jobMaterialDetails[id];
                   return ListTile(
-                    title: Text(material?.name ?? 'Loading...'),
-                    subtitle: Text('Price: \$${material?.price.toStringAsFixed(2) ?? 'Loading...'}'),
+                    title: Text(jobMaterial?.name ?? 'Loading...'),
+                    subtitle: Text('Price: \$${jobMaterial?.price.toStringAsFixed(2) ?? 'Loading...'}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
                         setState(() {
-                          _selectedMaterialIds.remove(id);
-                          _materialDetails.remove(id);
+                          _selectedJobMaterialIds.remove(id);
+                          _jobMaterialDetails.remove(id);
                         });
                       },
                     ),

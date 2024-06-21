@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class MaterialModel {
+class JobMaterialModel {
   String? documentId; // firestore document ID
   String name;
   double price;
@@ -8,7 +8,7 @@ class MaterialModel {
   // Add other useful properties as needed
 
   // Constructor
-  MaterialModel({
+  JobMaterialModel({
     this.documentId,
     required this.name,
     required this.price,
@@ -17,8 +17,8 @@ class MaterialModel {
   });
 
   // From JSON
-  factory MaterialModel.fromJson(Map<String, dynamic> json, String id) {
-    return MaterialModel(
+  factory JobMaterialModel.fromJson(Map<String, dynamic> json, String id) {
+    return JobMaterialModel(
       documentId: id,
       name: json['name'],
       price: json['price'],
@@ -38,7 +38,7 @@ class MaterialModel {
   }
 
   // From Firestore Document
-  factory MaterialModel.fromDocument(DocumentSnapshot doc) {
-    return MaterialModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
+  factory JobMaterialModel.fromDocument(DocumentSnapshot doc) {
+    return JobMaterialModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
   }
 }

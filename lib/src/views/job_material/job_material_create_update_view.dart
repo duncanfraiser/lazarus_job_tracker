@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/models/material_model.dart';
-import 'package:lazarus_job_tracker/src/services/material_service.dart';
+import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
+import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
 
-class MaterialCreateUpdateView extends StatefulWidget {
-  final MaterialModel? material; // If null, it means we're creating a new Material
+class JobMaterialCreateUpdateView extends StatefulWidget {
+  final JobMaterialModel? jobMaterial; // If null, it means we're creating a new Material
 
-  const MaterialCreateUpdateView({super.key, this.material});
+  const JobMaterialCreateUpdateView({super.key, this.jobMaterial});
 
   @override
-  _MaterialCreateUpdateViewState createState() => _MaterialCreateUpdateViewState();
+  _JobMaterialCreateUpdateViewState createState() => _JobMaterialCreateUpdateViewState();
 }
 
-class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
+class _JobMaterialCreateUpdateViewState extends State<JobMaterialCreateUpdateView> {
   final _formKey = GlobalKey<FormState>();
-  final MaterialService _materialService = MaterialService();
+  final JobMaterialService _materialService = JobMaterialService();
 
   late TextEditingController _nameController;
   late TextEditingController _priceController;
@@ -22,9 +22,9 @@ class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.material?.name ?? '');
-    _priceController = TextEditingController(text: widget.material?.price.toString() ?? '');
-    _descriptionController = TextEditingController(text: widget.material?.description ?? '');
+    _nameController = TextEditingController(text: widget.jobMaterial?.name ?? '');
+    _priceController = TextEditingController(text: widget.jobMaterial?.price.toString() ?? '');
+    _descriptionController = TextEditingController(text: widget.jobMaterial?.description ?? '');
   }
 
   @override
@@ -42,17 +42,17 @@ class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
         final price = double.parse(_priceController.text);
         final description = _descriptionController.text;
 
-        if (widget.material == null) {
+        if (widget.jobMaterial == null) {
           // Create new Material
-          await _materialService.addMaterial(MaterialModel(
+          await _materialService.addJobMaterial(JobMaterialModel(
             name: name,
             price: price,
             description: description,
           ));
         } else {
           // Update existing Material
-          await _materialService.updateMaterial(MaterialModel(
-            documentId: widget.material!.documentId,
+          await _materialService.updateJobMaterial(JobMaterialModel(
+            documentId: widget.jobMaterial!.documentId,
             name: name,
             price: price,
             description: description,
@@ -69,7 +69,7 @@ class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
   }
 
   void _deleteMaterial() async {
-    if (widget.material != null && widget.material!.documentId != null) {
+    if (widget.jobMaterial != null && widget.jobMaterial!.documentId != null) {
       bool? confirmDelete = await showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -89,7 +89,7 @@ class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
       );
 
       if (confirmDelete == true) {
-        await _materialService.deleteMaterial(widget.material!.documentId!);
+        await _materialService.deleteJobMaterial(widget.jobMaterial!.documentId!);
         Navigator.pop(context); // Close the form after deletion
       }
     }
@@ -99,9 +99,9 @@ class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.material == null ? 'Create Material' : 'Update Material'),
+        title: Text(widget.jobMaterial == null ? 'Create Material' : 'Update Material'),
         actions: [
-          if (widget.material != null) // Show delete button only for existing Material
+          if (widget.jobMaterial != null) // Show delete button only for existing Material
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteMaterial,
@@ -151,7 +151,7 @@ class _MaterialCreateUpdateViewState extends State<MaterialCreateUpdateView> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: Text(widget.material == null ? 'Create' : 'Update'),
+                child: Text(widget.jobMaterial == null ? 'Create' : 'Update'),
               ),
             ],
           ),

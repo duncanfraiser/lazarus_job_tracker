@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
-import 'package:lazarus_job_tracker/src/models/material_model.dart';
+import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
-import 'package:lazarus_job_tracker/src/services/material_service.dart';
+import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart'; // Import JobService to update job in database
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_usage_dialog.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart';
-import 'package:lazarus_job_tracker/src/views/material/material_detail_view.dart';
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_detail_view.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_detail_view.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +26,7 @@ class _JobDetailViewState extends State<JobDetailView> {
   @override
   Widget build(BuildContext context) {
     final equipmentService = Provider.of<EquipmentService>(context, listen: false);
-    final materialService = Provider.of<MaterialService>(context, listen: false);
+    final materialService = Provider.of<JobMaterialService>(context, listen: false);
     final clientService = Provider.of<ClientService>(context, listen: false);
     final jobService = Provider.of<JobService>(context, listen: false); // Get JobService
 
@@ -153,8 +152,8 @@ class _JobDetailViewState extends State<JobDetailView> {
             const SizedBox(height: 16.0),
             Text('Materials', style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(height: 8.0),
-            FutureBuilder<List<MaterialModel>>(
-              future: _loadMaterialDetails(materialService, widget.job.materialIds),
+            FutureBuilder<List<JobMaterialModel>>(
+              future: _loadMaterialDetails(materialService, widget.job.jobMaterialIds),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -179,7 +178,7 @@ class _JobDetailViewState extends State<JobDetailView> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MaterialDetailView(material: material),
+                              builder: (context) => JobMaterialDetailView(jobMaterial: material),
                             ),
                           );
                         },
@@ -209,8 +208,8 @@ class _JobDetailViewState extends State<JobDetailView> {
     )).toList());
   }
 
-  Future<List<MaterialModel>> _loadMaterialDetails(MaterialService service, List<String> ids) async {
-    return Future.wait(ids.map((id) async => await service.getMaterialById(id) ?? MaterialModel(
+  Future<List<JobMaterialModel>> _loadMaterialDetails(JobMaterialService service, List<String> ids) async {
+    return Future.wait(ids.map((id) async => await service.getJobMaterialById(id) ?? JobMaterialModel(
       documentId: id,
       name: 'Unknown',
       description: 'No description available',

@@ -5,7 +5,7 @@ class JobModel {
   final String name;
   final String instructions;
   final List<String> equipmentIds;
-  final List<String> materialIds;
+  final List<String> jobMaterialIds;
   final String? clientId;
   final Map<String, List<EquipmentUsage>> equipmentUsage;
 
@@ -15,7 +15,7 @@ class JobModel {
     required this.name,
     required this.instructions,
     required this.equipmentIds,
-    required this.materialIds,
+    required this.jobMaterialIds,
     this.clientId,
     Map<String, List<EquipmentUsage>>? equipmentUsage,
   }) : equipmentUsage = equipmentUsage ?? {};
@@ -27,7 +27,7 @@ class JobModel {
       name: json['name'],
       instructions: json['instructions'],
       equipmentIds: List<String>.from(json['equipmentIds'] ?? []),
-      materialIds: List<String>.from(json['materialIds'] ?? []),
+      jobMaterialIds: List<String>.from(json['materialIds'] ?? []),
       clientId: json['clientId'],
       equipmentUsage: (json['equipmentUsage'] as Map<String, dynamic>?)?.map((k, v) => MapEntry(k, List<EquipmentUsage>.from((v as List).map((e) => EquipmentUsage.fromJson(e))))) ?? {},
     );
@@ -39,7 +39,7 @@ class JobModel {
       'name': name,
       'instructions': instructions,
       'equipmentIds': equipmentIds,
-      'materialIds': materialIds,
+      'materialIds': jobMaterialIds,
       'clientId': clientId,
       'equipmentUsage': equipmentUsage.map((k, v) => MapEntry(k, v.map((e) => e.toJson()).toList())),
     };

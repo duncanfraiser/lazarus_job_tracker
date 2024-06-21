@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/models/material_model.dart';
-import 'package:lazarus_job_tracker/src/views/material/material_create_update_view.dart';
+import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
+import 'package:lazarus_job_tracker/src/views/job_material/job_material_create_update_view.dart';
 
-class MaterialDetailView extends StatelessWidget {
-  final MaterialModel material;
+class JobMaterialDetailView extends StatelessWidget {
+  final JobMaterialModel jobMaterial;
 
-  const MaterialDetailView({super.key, required this.material});
+  const JobMaterialDetailView({super.key, required this.jobMaterial});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(material.name),
+        title: Text(jobMaterial.name),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            _buildCard('Name', material.name),
+            _buildCard('Name', jobMaterial.name),
             const SizedBox(height: 8.0),
-            _buildCard('Price', '\$${material.price.toStringAsFixed(2)}'),
+            _buildCard('Price', '\$${jobMaterial.price.toStringAsFixed(2)}'),
             const SizedBox(height: 8.0),
-            _buildCard('Description', material.description),
+            _buildCard('Description', jobMaterial.description),
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MaterialCreateUpdateView(material: material),
+                    builder: (context) => JobMaterialCreateUpdateView(jobMaterial: jobMaterial),
                   ),
                 );
               },
@@ -40,7 +40,7 @@ class MaterialDetailView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const MaterialCreateUpdateView(),
+                    builder: (context) => const JobMaterialCreateUpdateView(),
                   ),
                 );
               },
