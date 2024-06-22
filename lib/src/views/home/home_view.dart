@@ -12,12 +12,12 @@ class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   Future<UserModel?> _getUserInfo(BuildContext context) async {
-    final userModel = Provider.of<UserModel>(context, listen: false);
-    final authService = AuthService();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.currentUser;
 
-    if (userModel.id.isNotEmpty) {
-      final user = await authService.getUserData(userModel.id);
-      return user;
+    if (user != null && user.uid.isNotEmpty) {
+      final userModel = await authService.getUserData(user.uid);
+      return userModel;
     }
     return null;
   }
@@ -64,7 +64,7 @@ class HomeView extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () async {
-                  final authService = AuthService();
+                  final authService = Provider.of<AuthService>(context, listen: false);
                   await authService.signOut();
                   Navigator.pushReplacementNamed(context, '/login');
                 },

@@ -50,20 +50,21 @@ class UserModel with ChangeNotifier {
   });
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return UserModel(
       documentId: doc.id, // Set documentId
-      id: doc['id'] ?? '', // Use doc['id'] or provide a default value
-      firstName: doc['firstName'],
-      lastName: doc['lastName'],
-      email: doc['email'],
-      companyName: doc['companyName'],
-      userRole: doc['userRole'],
-      phoneNumber: doc['phoneNumber'],
-      address: doc['address'],
-      emergencyContacts: (doc['emergencyContacts'] as List)
+      id: data['id'] ?? '', // Use data['id'] or provide a default value
+      firstName: data['firstName'],
+      lastName: data['lastName'],
+      email: data['email'],
+      companyName: data['companyName'],
+      userRole: data['userRole'],
+      phoneNumber: data['phoneNumber'],
+      address: data['address'],
+      emergencyContacts: (data['emergencyContacts'] as List)
           .map((e) => EmergencyContact.fromMap(e))
           .toList(),
-      isLoggedIn: doc['isLoggedIn'] ?? false, // Provide default value
+      isLoggedIn: data['isLoggedIn'] ?? false, // Provide default value
     );
   }
 

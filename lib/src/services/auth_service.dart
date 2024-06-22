@@ -6,6 +6,8 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  User? get currentUser => _auth.currentUser; // Add a getter for the current user
+
   Future<User?> signUp(String email, String password, UserModel userModel) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
@@ -47,7 +49,7 @@ class AuthService {
 
   Future<void> updateUserData(String userId, Map<String, dynamic> updatedData) async {
     try {
-      await _firestore.collection('users').doc(userId).update(updatedData);
+      await _firestore.collection('employees').doc(userId).update(updatedData);
     } catch (e) {
       print(e.toString());
       rethrow;
@@ -55,7 +57,7 @@ class AuthService {
   }
 
   Stream<List<UserModel>> getUsers() {
-    return _firestore.collection('users').snapshots().map((snapshot) =>
+    return _firestore.collection('employees').snapshots().map((snapshot) =>
       snapshot.docs.map((doc) => UserModel.fromDocument(doc)).toList());
   }
 
@@ -68,7 +70,6 @@ class AuthService {
     }
   }
 
-  // Add this method to create a user
   Future<User?> createUser(UserModel userModel, String password) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: userModel.email, password: password);
@@ -84,20 +85,24 @@ class AuthService {
     }
   }
 
-    Future<void> deleteUser(String userId) async {
+  Future<void> deleteUser(String userId) async {
     try {
       // Delete user data from Firestore
       await _firestore.collection('employees').doc(userId).delete();
       
       // Optionally, delete the user from FirebaseAuth
-      // await _auth.currentUser!.delete();
+      // Note: You can only delete the currently signed-in user
+      User? user = _auth.currentUser;
+      if (user != null && user.uid == userId) {
+        await user.delete();
+      }
     } catch (e) {
       print(e.toString());
       rethrow;
     }
   }
 
-    Future<List<UserModel>> getAllUsers() async {
+  Future<List<UserModel>> getAllUsers() async {
     try {
       QuerySnapshot querySnapshot = await _firestore.collection('employees').get();
       return querySnapshot.docs.map((doc) => UserModel.fromDocument(doc)).toList();
@@ -106,5 +111,4 @@ class AuthService {
       rethrow;
     }
   }
-
 }
