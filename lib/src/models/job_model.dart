@@ -1,42 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lazarus_job_tracker/src/views/job_material/job_material_usage_dialog.dart';
 
 class JobModel {
-  final String documentId;
-  final String name;
-  final String instructions;
-  final List<String> equipmentIds;
-  final List<String> jobMaterialIds;
-  final String? clientId;
-  final Map<String, List<EquipmentUsage>> equipmentUsage;
-  final Map<String, List<JobMaterialUsage>> jobMaterialUsage; // Add this field
+  String? documentId;
+  String name;
+  String instructions;
+  String clientId;
+  List<String> equipmentIds;
+  List<String> jobMaterialIds;
+  Map<String, List<EquipmentUsage>> equipmentUsage;
+  Map<String, List<JobMaterialUsage>> jobMaterialUsage;
 
   JobModel({
-    required this.documentId,
+    this.documentId,
     required this.name,
     required this.instructions,
+    required this.clientId,
     required this.equipmentIds,
     required this.jobMaterialIds,
-    this.clientId,
-    Map<String, List<EquipmentUsage>>? equipmentUsage,
-    Map<String, List<JobMaterialUsage>>? jobMaterialUsage, // Add this field
-  })  : equipmentUsage = equipmentUsage ?? {},
-        jobMaterialUsage = jobMaterialUsage ?? {}; // Initialize
+    required this.equipmentUsage,
+    required this.jobMaterialUsage,
+  });
 
-  factory JobModel.fromJson(Map<String, dynamic> json, String id) {
+  factory JobModel.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+
     return JobModel(
-      documentId: id,
-      name: json['name'],
-      instructions: json['instructions'],
-      equipmentIds: List<String>.from(json['equipmentIds'] ?? []),
-      jobMaterialIds: List<String>.from(json['materialIds'] ?? []),
-      clientId: json['clientId'],
-      equipmentUsage: (json['equipmentUsage'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(k, List<EquipmentUsage>.from((v as List).map((e) => EquipmentUsage.fromJson(e)))))
-          ?? {},
-      jobMaterialUsage: (json['jobMaterialUsage'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(k, List<JobMaterialUsage>.from((v as List).map((e) => JobMaterialUsage.fromJson(e)))))
-          ?? {}, // Add this field
+      documentId: doc.id,
+      name: data['name'] ?? '',
+      instructions: data['instructions'] ?? '',
+      clientId: data['clientId'] ?? '',
+      equipmentIds: List<String>.from(data['equipmentIds'] ?? []),
+      jobMaterialIds: List<String>.from(data['jobMaterialIds'] ?? []),
+      equipmentUsage: (data['equipmentUsage'] ?? {}).map<String, List<EquipmentUsage>>(
+        (key, value) => MapEntry(key, (value as List).map((e) => EquipmentUsage.fromMap(e)).toList()),
+      ),
+      jobMaterialUsage: (data['jobMaterialUsage'] ?? {}).map<String, List<JobMaterialUsage>>(
+        (key, value) => MapEntry(key, (value as List).map((e) => JobMaterialUsage.fromMap(e)).toList()),
+      ),
     );
   }
 
@@ -44,32 +44,28 @@ class JobModel {
     return {
       'name': name,
       'instructions': instructions,
-      'equipmentIds': equipmentIds,
-      'materialIds': jobMaterialIds,
       'clientId': clientId,
-      'equipmentUsage': equipmentUsage.map((k, v) => MapEntry(k, v.map((e) => e.toJson()).toList())),
-      'jobMaterialUsage': jobMaterialUsage.map((k, v) => MapEntry(k, v.map((e) => e.toJson()).toList())), // Add this field
+      'equipmentIds': equipmentIds,
+      'jobMaterialIds': jobMaterialIds,
+      'equipmentUsage': equipmentUsage.map((key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
+      'jobMaterialUsage': jobMaterialUsage.map((key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
     };
-  }
-
-  factory JobModel.fromDocument(DocumentSnapshot doc) {
-    return JobModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
   }
 }
 
 class EquipmentUsage {
-  final DateTime date;
-  final double hours;
+  DateTime date;
+  double hours;
 
   EquipmentUsage({
     required this.date,
     required this.hours,
   });
 
-  factory EquipmentUsage.fromJson(Map<String, dynamic> json) {
+  factory EquipmentUsage.fromMap(Map<String, dynamic> data) {
     return EquipmentUsage(
-      date: (json['date'] as Timestamp).toDate(),
-      hours: json['hours'],
+      date: (data['date'] as Timestamp).toDate(),
+      hours: data['hours'],
     );
   }
 
@@ -77,6 +73,30 @@ class EquipmentUsage {
     return {
       'date': date,
       'hours': hours,
+    };
+  }
+}
+
+class JobMaterialUsage {
+  DateTime date;
+  double quantity;
+
+  JobMaterialUsage({
+    required this.date,
+    required this.quantity,
+  });
+
+  factory JobMaterialUsage.fromMap(Map<String, dynamic> data) {
+    return JobMaterialUsage(
+      date: (data['date'] as Timestamp).toDate(),
+      quantity: data['quantity'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'quantity': quantity,
     };
   }
 }

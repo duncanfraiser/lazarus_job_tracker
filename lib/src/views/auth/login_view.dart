@@ -1,69 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
-import 'package:lazarus_job_tracker/src/views/auth/signup_view.dart';
 import 'package:provider/provider.dart';
+import 'package:lazarus_job_tracker/src/services/auth_service.dart';
+import 'package:lazarus_job_tracker/src/views/home/home_view.dart';
+import 'package:lazarus_job_tracker/src/views/auth/sign_up_view.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
+
+  @override
+  _LoginViewState createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final ValueNotifier<bool> _isLoading = ValueNotifier(false);
+  bool _isLoading = false;
 
-  LoginView({super.key});
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _login(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final authService = Provider.of<AuthService>(context, listen: false);
+        await authService.signIn(_emailController.text, _passwordController.text);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeView()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $e'),
+        ));
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        title: const Text('Login'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            ValueListenableBuilder<bool>(
-              valueListenable: _isLoading,
-              builder: (context, isLoading, child) {
-                if (isLoading) {
-                  return const CircularProgressIndicator();
-                } else {
-                  return ElevatedButton(
-                    onPressed: () async {
-                      _isLoading.value = true;
-                      await authViewModel.signIn(_emailController.text, _passwordController.text);
-                      _isLoading.value = false;
-                      if (authViewModel.user != null) {
-                        Navigator.pushReplacementNamed(context, '/');
-                      } else {
-                        // Handle login error
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Failed to login'),
-                        ));
-                      }
-                    },
-                    child: const Text('Login'),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: <Widget>[
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters long';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: () => _login(context),
+                      child: const Text('Login'),
+                    ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignUpView()),
                   );
-                }
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignupView()),
-                );
-              },
-              child: const Text('Register'),
-            ),
-          ],
+                },
+                child: const Text('Don\'t have an account? Sign up'),
+              ),
+            ],
+          ),
         ),
       ),
     );

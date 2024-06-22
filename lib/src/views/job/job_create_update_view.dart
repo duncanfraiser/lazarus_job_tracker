@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
-import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
-import 'package:lazarus_job_tracker/src/models/client_model.dart';
-import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
-import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
-import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
-import 'package:provider/provider.dart';
+import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
 
 class JobCreateUpdateView extends StatefulWidget {
   final JobModel? job; // If null, it means we're creating a new job
@@ -21,78 +17,34 @@ class JobCreateUpdateView extends StatefulWidget {
 class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   final _formKey = GlobalKey<FormState>();
   final JobService _jobService = JobService();
+  final ClientService _clientService = ClientService();
+  final EquipmentService _equipmentService = EquipmentService();
+  final JobMaterialService _jobMaterialService = JobMaterialService();
 
   late TextEditingController _nameController;
   late TextEditingController _instructionsController;
-  List<String> _selectedEquipmentIds = [];
-  final Map<String, EquipmentModel> _equipmentDetails = {};
-  List<String> _selectedJobMaterialIds = [];
-  final Map<String, JobMaterialModel> _jobMaterialDetails = {};
-  String? _selectedClientId;
-  ClientModel? _selectedClient;
+  late TextEditingController _clientIdController;
+  late TextEditingController _equipmentIdsController;
+  late TextEditingController _jobMaterialIdsController;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.job?.name ?? '');
     _instructionsController = TextEditingController(text: widget.job?.instructions ?? '');
-    _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
-    _selectedJobMaterialIds = widget.job?.jobMaterialIds ?? [];
-    _selectedClientId = widget.job?.clientId;
-    _loadSelectedClient();
-    _loadSelectedEquipmentDetails();
-    _loadSelectedJobMaterialDetails();
+    _clientIdController = TextEditingController(text: widget.job?.clientId ?? '');
+    _equipmentIdsController = TextEditingController(text: widget.job?.equipmentIds.join(', ') ?? '');
+    _jobMaterialIdsController = TextEditingController(text: widget.job?.jobMaterialIds.join(', ') ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _instructionsController.dispose();
+    _clientIdController.dispose();
+    _equipmentIdsController.dispose();
+    _jobMaterialIdsController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadSelectedClient() async {
-    if (_selectedClientId != null) {
-      final clientService = Provider.of<ClientService>(context, listen: false);
-      final client = await clientService.getClientById(_selectedClientId!);
-      if (mounted) {
-        setState(() {
-          _selectedClient = client;
-        });
-      }
-    }
-  }
-
-  Future<void> _loadSelectedEquipmentDetails() async {
-    if (_selectedEquipmentIds.isNotEmpty) {
-      final equipmentService = Provider.of<EquipmentService>(context, listen: false);
-      for (var id in _selectedEquipmentIds) {
-        final equipment = await equipmentService.getEquipmentById(id);
-        if (mounted) {
-          setState(() {
-            if (equipment != null) {
-              _equipmentDetails[id] = equipment;
-            }
-          });
-        }
-      }
-    }
-  }
-
-  Future<void> _loadSelectedJobMaterialDetails() async {
-    if (_selectedJobMaterialIds.isNotEmpty) {
-      final jobMaterialService = Provider.of<JobMaterialService>(context, listen: false);
-      for (var id in _selectedJobMaterialIds) {
-        final jobMaterial = await jobMaterialService.getJobMaterialById(id);
-        if (mounted) {
-          setState(() {
-            if (jobMaterial != null) {
-              _jobMaterialDetails[id] = jobMaterial;
-            }
-          });
-        }
-      }
-    }
   }
 
   void _submitForm() async {
@@ -100,40 +52,32 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
       try {
         final name = _nameController.text;
         final instructions = _instructionsController.text;
+        final clientId = _clientIdController.text;
+        final equipmentIds = _equipmentIdsController.text.split(', ').toList();
+        final jobMaterialIds = _jobMaterialIdsController.text.split(', ').toList();
+
+        final job = JobModel(
+          documentId: widget.job?.documentId,
+          name: name,
+          instructions: instructions,
+          clientId: clientId,
+          equipmentIds: equipmentIds,
+          jobMaterialIds: jobMaterialIds,
+          equipmentUsage: widget.job?.equipmentUsage ?? {},
+          jobMaterialUsage: widget.job?.jobMaterialUsage ?? {},
+        );
 
         if (widget.job == null) {
-          // Create new job
-          await _jobService.addJob(JobModel(
-            documentId: '', 
-            name: name,
-            instructions: instructions,
-            equipmentIds: _selectedEquipmentIds,
-            jobMaterialIds: _selectedJobMaterialIds,
-            clientId: _selectedClientId,
-            equipmentUsage: {}, // Initialize empty map for new job
-          ));
+          await _jobService.addJob(job);
         } else {
-          // Update existing job
-          await _jobService.updateJob(JobModel(
-            documentId: widget.job!.documentId,
-            name: name,
-            instructions: instructions,
-            equipmentIds: _selectedEquipmentIds,
-            jobMaterialIds: _selectedJobMaterialIds,
-            clientId: _selectedClientId,
-            equipmentUsage: widget.job!.equipmentUsage, // Use existing equipment usage
-          ));
+          await _jobService.updateJob(job);
         }
 
-        if (mounted) {
-          Navigator.pop(context);
-        }
+        Navigator.pop(context);
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Error: $e'),
-          ));
-        }
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error: $e'),
+        ));
       }
     }
   }
@@ -159,273 +103,19 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
       );
 
       if (confirmDelete == true) {
-        await _jobService.deleteJob(widget.job!.documentId);
-        if (mounted) {
-          Navigator.of(context).pop(); // Close the form after deletion
-        }
+        await _jobService.deleteJob(widget.job!.documentId!);
+        Navigator.pop(context); // Close the form after deletion
       }
     }
   }
 
-  Future<void> _addNewEquipment(BuildContext context, EquipmentService equipmentService) async {
-    final newEquipmentNameController = TextEditingController();
-    final newEquipmentDescriptionController = TextEditingController();
-    final newEquipmentRatePerHourController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add New Equipment'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: newEquipmentNameController,
-              decoration: const InputDecoration(labelText: 'Equipment Name'),
-            ),
-            TextFormField(
-              controller: newEquipmentRatePerHourController,
-              decoration: const InputDecoration(labelText: 'Rate Per Hour'),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a rate per hour';
-                }
-                if (double.tryParse(value) == null) {
-                  return 'Please enter a valid number';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: newEquipmentDescriptionController,
-              decoration: const InputDecoration(labelText: 'Equipment Description'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final name = newEquipmentNameController.text;
-              final description = newEquipmentDescriptionController.text;
-              final ratePerHour = double.tryParse(newEquipmentRatePerHourController.text) ?? 0.0;
-              if (name.isNotEmpty && description.isNotEmpty) {
-                final newEquipment = EquipmentModel(
-                  documentId: '', // Firebase will generate this automatically
-                  name: name,
-                  description: description, 
-                  ratePerHour: ratePerHour,
-                );
-                final docRef = await equipmentService.addEquipment(newEquipment);
-                if (mounted) {
-                  setState(() {
-                    _selectedEquipmentIds.add(docRef.id);
-                    _equipmentDetails[docRef.id] = newEquipment;
-                  });
-                }
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
-
-Future<void> _addJobNewMaterial(BuildContext context, JobMaterialService jobMaterialService) async {
-  final newJobMaterialNameController = TextEditingController();
-  final newJobMaterialDescriptionController = TextEditingController();
-  final newJobMaterialPriceController = TextEditingController();
-  await showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Add New Material'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            controller: newJobMaterialNameController,
-            decoration: const InputDecoration(labelText: 'Material Name'),
-          ),
-          TextFormField(
-            controller: newJobMaterialPriceController,
-            decoration: const InputDecoration(labelText: 'Price'),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a price';
-              }
-              if (double.tryParse(value) == null) {
-                return 'Please enter a valid number';
-              }
-              return null;
-            },
-          ),
-          TextFormField(
-            controller: newJobMaterialDescriptionController,
-            decoration: const InputDecoration(labelText: 'Material Description'),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () async {
-            final name = newJobMaterialNameController.text;
-            final description = newJobMaterialDescriptionController.text;
-            final price = double.tryParse(newJobMaterialPriceController.text) ?? 0.0;
-            if (name.isNotEmpty && description.isNotEmpty) {
-              final newJobMaterial = JobMaterialModel(
-                documentId: '', // Firebase will generate this automatically
-                name: name,
-                description: description,
-                price: price,
-              );
-              final docRef = await jobMaterialService.addJobMaterial(newJobMaterial);
-              if (mounted) {
-                setState(() {
-                  _selectedJobMaterialIds.add(docRef.id);
-                  _jobMaterialDetails[docRef.id] = newJobMaterial;
-                });
-              }
-              if (mounted) {
-                Navigator.of(context).pop();
-              }
-            }
-          },
-          child: const Text('Add'),
-        ),
-      ],
-    ),
-  );
-}
-
-
-  Future<void> _selectEquipment(String id, EquipmentService equipmentService) async {
-    final equipment = await equipmentService.getEquipmentById(id);
-    if (mounted) {
-      setState(() {
-        _selectedEquipmentIds.add(id);
-        _equipmentDetails[id] = equipment!;
-      });
-    }
-  }
-
-  Future<void> _selectJobMaterial(String id, JobMaterialService jobMaterialService) async {
-    final jobMaterial = await jobMaterialService.getJobMaterialById(id);
-    if (mounted) {
-      setState(() {
-        _selectedJobMaterialIds.add(id);
-        _jobMaterialDetails[id] = jobMaterial!;
-      });
-    }
-  }
-
-  Future<void> _selectClient(String id, ClientService clientService) async {
-    final client = await clientService.getClientById(id);
-    if (mounted) {
-      setState(() {
-        _selectedClientId = id;
-        _selectedClient = client;
-      });
-    }
-  }
-
-  Future<void> _addNewClient(BuildContext context, ClientService clientService) async {
-    final newClientFNameController = TextEditingController();
-    final newClientLNameController = TextEditingController();
-    final newClientAddressController = TextEditingController();
-    final newClientPhoneController = TextEditingController();
-    final newClientEmailController = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add New Client'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: newClientFNameController,
-              decoration: const InputDecoration(labelText: 'First Name'),
-            ),
-            TextFormField(
-              controller: newClientLNameController,
-              decoration: const InputDecoration(labelText: 'Last Name'),
-            ),
-            TextFormField(
-              controller: newClientAddressController,
-              decoration: const InputDecoration(labelText: 'Billing Address'),
-            ),
-            TextFormField(
-              controller: newClientPhoneController,
-              decoration: const InputDecoration(labelText: 'Phone Number'),
-            ),
-            TextFormField(
-              controller: newClientEmailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final fName = newClientFNameController.text;
-              final lName = newClientLNameController.text;
-              final billingAddress = newClientAddressController.text;
-              final phone = newClientPhoneController.text;
-              final email = newClientEmailController.text;
-              if (fName.isNotEmpty && lName.isNotEmpty && billingAddress.isNotEmpty && phone.isNotEmpty && email.isNotEmpty) {
-                final newClient = ClientModel(
-                  documentId: '', // Firebase will generate this automatically
-                  fName: fName,
-                  lName: lName,
-                  billingAddress: billingAddress,
-                  phone: phone,
-                  email: email,
-                );
-                final docRef = await clientService.addClient(newClient);
-                if (mounted) {
-                  setState(() {
-                    _selectedClientId = docRef.id;
-                    _selectedClient = newClient;
-                  });
-                }
-                if (mounted) {
-                  Navigator.of(context).pop();
-                }
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final equipmentService = Provider.of<EquipmentService>(context);
-    final clientService = Provider.of<ClientService>(context);
-    final jobMaterialService = Provider.of<JobMaterialService>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.job == null ? 'Add Job' : 'Update Job'),
+        title: Text(widget.job == null ? 'Create Job' : 'Update Job'),
         actions: [
-          if (widget.job != null) // Show delete button only for existing job
+          if (widget.job != null) // Show delete button only for existing jobs
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteJob,
@@ -440,10 +130,10 @@ Future<void> _addJobNewMaterial(BuildContext context, JobMaterialService jobMate
             children: <Widget>[
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Job Name'),
+                decoration: const InputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter job name.';
+                    return 'Please enter a name';
                   }
                   return null;
                 },
@@ -453,178 +143,39 @@ Future<void> _addJobNewMaterial(BuildContext context, JobMaterialService jobMate
                 decoration: const InputDecoration(labelText: 'Instructions'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter job instructions.';
+                    return 'Please enter instructions';
                   }
                   return null;
                 },
               ),
-              StreamBuilder<List<ClientModel>>(
-                stream: clientService.getClients(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const CircularProgressIndicator();
-                  final clientList = snapshot.data!;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      DropdownButtonFormField<String>(
-                        value: _selectedClientId,
-                        decoration: const InputDecoration(labelText: 'Select Client'),
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: 'addNewClient',
-                            child: Text('Add New Client', style: TextStyle(color: Theme.of(context).primaryColor)),
-                          ),
-                          ...clientList.map((client) {
-                            return DropdownMenuItem<String>(
-                              value: client.documentId,
-                              child: Row(
-                                children: [
-                                  if (_selectedClientId == client.documentId) 
-                                    const Icon(Icons.check, color: Colors.green),
-                                  Text('${client.fName} ${client.lName}'),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                        onChanged: (value) {
-                          if (value != null && value == 'addNewClient') {
-                            _addNewClient(context, clientService);
-                          } else if (value != null && value != _selectedClientId) {
-                            _selectClient(value, clientService);
-                          }
-                        },
-                      ),
-                    ],
-                  );
+              TextFormField(
+                controller: _clientIdController,
+                decoration: const InputDecoration(labelText: 'Client ID'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a client ID';
+                  }
+                  return null;
                 },
               ),
-              StreamBuilder<List<EquipmentModel>>(
-                stream: equipmentService.getEquipments(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const CircularProgressIndicator();
-                  final equipmentList = snapshot.data!;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      DropdownButtonFormField<String>(
-                        value: null,
-                        decoration: const InputDecoration(labelText: 'Select Equipment'),
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: 'addNewEquipment',
-                            child: Text('Add New Equipment', style: TextStyle(color: Theme.of(context).primaryColor)),
-                          ),
-                          ...equipmentList.map((equipment) {
-                            return DropdownMenuItem<String>(
-                              value: equipment.documentId,
-                              child: Row(
-                                children: [
-                                  if (_selectedEquipmentIds.contains(equipment.documentId)) 
-                                    const Icon(Icons.check, color: Colors.green),
-                                  Text(equipment.name),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                        onChanged: (value) {
-                          if (value != null && value == 'addNewEquipment') {
-                            _addNewEquipment(context, equipmentService);
-                          } else if (value != null && !_selectedEquipmentIds.contains(value)) {
-                            _selectEquipment(value, equipmentService);
-                          }
-                        },
-                      ),
-                    ],
-                  );
+              TextFormField(
+                controller: _equipmentIdsController,
+                decoration: const InputDecoration(labelText: 'Equipment IDs (comma separated)'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter equipment IDs';
+                  }
+                  return null;
                 },
               ),
-              StreamBuilder<List<JobMaterialModel>>(
-                stream: jobMaterialService.getJobMaterials(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const CircularProgressIndicator();
-                  final jobMaterialList = snapshot.data!;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      DropdownButtonFormField<String>(
-                        value: null,
-                        decoration: const InputDecoration(labelText: 'Select Material'),
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: 'addNewJobMaterial',
-                            child: Text('Add New Material', style: TextStyle(color: Theme.of(context).primaryColor)),
-                          ),
-                          ...jobMaterialList.map((jobMaterial) {
-                            return DropdownMenuItem<String>(
-                              value: jobMaterial.documentId,
-                              child: Row(
-                                children: [
-                                  if (_selectedJobMaterialIds.contains(jobMaterial.documentId)) 
-                                    const Icon(Icons.check, color: Colors.green),
-                                  Text(jobMaterial.name),
-                                ],
-                              ),
-                            );
-                          }),
-                        ],
-                        onChanged: (value) {
-                          if (value != null && value == 'addJobNewMaterial') {
-                            _addJobNewMaterial(context, jobMaterialService);
-                          } else if (value != null && !_selectedJobMaterialIds.contains(value)) {
-                            _selectJobMaterial(value, jobMaterialService);
-                          }
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              Text('Selected Equipment', style: Theme.of(context).textTheme.bodyLarge),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _selectedEquipmentIds.length,
-                itemBuilder: (context, index) {
-                  final id = _selectedEquipmentIds[index];
-                  final equipment = _equipmentDetails[id];
-                  return ListTile(
-                    title: Text(equipment?.name ?? 'Loading...'),
-                    subtitle: Text('Rate per Hour: \$${equipment?.ratePerHour.toStringAsFixed(2) ?? 'Loading...'}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        setState(() {
-                          _selectedEquipmentIds.remove(id);
-                          _equipmentDetails.remove(id);
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              Text('Selected Materials', style: Theme.of(context).textTheme.bodyLarge),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _selectedJobMaterialIds.length,
-                itemBuilder: (context, index) {
-                  final id = _selectedJobMaterialIds[index];
-                  final jobMaterial = _jobMaterialDetails[id];
-                  return ListTile(
-                    title: Text(jobMaterial?.name ?? 'Loading...'),
-                    subtitle: Text('Price: \$${jobMaterial?.price.toStringAsFixed(2) ?? 'Loading...'}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        setState(() {
-                          _selectedJobMaterialIds.remove(id);
-                          _jobMaterialDetails.remove(id);
-                        });
-                      },
-                    ),
-                  );
+              TextFormField(
+                controller: _jobMaterialIdsController,
+                decoration: const InputDecoration(labelText: 'Material IDs (comma separated)'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter material IDs';
+                  }
+                  return null;
                 },
               ),
               const SizedBox(height: 20),

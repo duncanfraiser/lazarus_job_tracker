@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:intl/intl.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 
@@ -7,10 +7,7 @@ class EquipmentUsageDialog extends StatefulWidget {
   final EquipmentModel equipment;
   final List<EquipmentUsage> usage;
 
-  const EquipmentUsageDialog({super.key, 
-    required this.equipment,
-    required this.usage,
-  });
+  const EquipmentUsageDialog({super.key, required this.equipment, required this.usage});
 
   @override
   _EquipmentUsageDialogState createState() => _EquipmentUsageDialogState();
@@ -18,7 +15,7 @@ class EquipmentUsageDialog extends StatefulWidget {
 
 class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
   final List<EquipmentUsage> _usage = [];
-  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd'); // Define the date format
+  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
@@ -109,7 +106,7 @@ class _EquipmentUsageDialogState extends State<EquipmentUsageDialog> {
             onPressed: () {
               if (dateController.text.isNotEmpty && hoursController.text.isNotEmpty) {
                 try {
-                  final date = _dateFormat.parse(dateController.text); // Parse the date using the defined format
+                  final date = _dateFormat.parse(dateController.text);
                   final hours = double.parse(hoursController.text);
                   Navigator.of(context).pop(EquipmentUsage(date: date, hours: hours));
                 } catch (e) {

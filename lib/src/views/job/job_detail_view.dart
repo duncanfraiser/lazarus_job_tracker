@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
-import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
-import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
-import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
+import 'package:lazarus_job_tracker/src/models/job_model.dart';
+import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_usage_dialog.dart';
 import 'package:lazarus_job_tracker/src/views/job/job_create_update_view.dart';
@@ -47,7 +47,15 @@ class _JobDetailViewState extends State<JobDetailView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => JobCreateUpdateView(job: widget.job),
+                    builder: (context) => MultiProvider(
+                      providers: [
+                        Provider<JobService>(create: (_) => jobService),
+                        Provider<ClientService>(create: (_) => clientService),
+                        Provider<EquipmentService>(create: (_) => equipmentService),
+                        Provider<JobMaterialService>(create: (_) => materialService),
+                      ],
+                      child: JobCreateUpdateView(job: widget.job),
+                    ),
                   ),
                 );
               },

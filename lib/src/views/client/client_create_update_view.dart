@@ -17,7 +17,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
 
   late TextEditingController _fNameController;
   late TextEditingController _lNameController;
-  late TextEditingController _addressController;
+  late TextEditingController _billingAddressController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
 
@@ -26,7 +26,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
     super.initState();
     _fNameController = TextEditingController(text: widget.client?.fName ?? '');
     _lNameController = TextEditingController(text: widget.client?.lName ?? '');
-    _addressController = TextEditingController(text: widget.client?.billingAddress ?? '');
+    _billingAddressController = TextEditingController(text: widget.client?.billingAddress ?? '');
     _phoneController = TextEditingController(text: widget.client?.phone ?? '');
     _emailController = TextEditingController(text: widget.client?.email ?? '');
   }
@@ -35,7 +35,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
   void dispose() {
     _fNameController.dispose();
     _lNameController.dispose();
-    _addressController.dispose();
+    _billingAddressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     super.dispose();
@@ -46,7 +46,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
       try {
         final fName = _fNameController.text;
         final lName = _lNameController.text;
-        final address = _addressController.text;
+        final billingAddress = _billingAddressController.text;
         final phone = _phoneController.text;
         final email = _emailController.text;
 
@@ -55,7 +55,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
           await _clientService.addClient(ClientModel(
             fName: fName,
             lName: lName,
-            billingAddress: address,
+            billingAddress: billingAddress,
             phone: phone,
             email: email,
           ));
@@ -65,7 +65,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
             documentId: widget.client!.documentId,
             fName: fName,
             lName: lName,
-            billingAddress: address,
+            billingAddress: billingAddress,
             phone: phone,
             email: email,
           ));
@@ -113,7 +113,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
       appBar: AppBar(
         title: Text(widget.client == null ? 'Create Client' : 'Update Client'),
         actions: [
-          if (widget.client != null) // Show delete button only for existing client
+          if (widget.client != null) // Show delete button only for existing clients
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteClient,
@@ -147,11 +147,11 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
                 },
               ),
               TextFormField(
-                controller: _addressController,
+                controller: _billingAddressController,
                 decoration: const InputDecoration(labelText: 'Billing Address'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter an address';
+                    return 'Please enter a billing address';
                   }
                   return null;
                 },

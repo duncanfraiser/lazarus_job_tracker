@@ -69,4 +69,3 @@ class EquipmentDetailView extends StatelessWidget {
     );
   }
 }
-

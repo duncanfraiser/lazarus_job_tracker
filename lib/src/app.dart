@@ -1,33 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
-import 'package:lazarus_job_tracker/src/views/auth/login_view.dart';
-import 'package:lazarus_job_tracker/src/views/auth/signup_view.dart';
-import 'package:lazarus_job_tracker/src/views/home/home_view.dart';
+import 'package:lazarus_job_tracker/src/models/user_model.dart';
+import 'package:lazarus_job_tracker/src/views/auth/create_user_view.dart';
+import 'package:lazarus_job_tracker/src/views/auth/sign_up_view.dart';
+import 'package:lazarus_job_tracker/src/views/auth/user_list_view.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:lazarus_job_tracker/src/views/home/home_view.dart';
+import 'package:lazarus_job_tracker/src/views/auth/login_view.dart';
+import 'package:lazarus_job_tracker/src/services/job_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
+import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 
-/// The Widget that configures your application.
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserModel(
+          id: '',
+          firstName: '',
+          lastName: '',
+          email: '',
+          companyName: '',
+          userRole: '',
+          phoneNumber: '',
+          address: '',
+          emergencyContacts: [],
+          isLoggedIn: false,
+        )),
+        Provider(create: (_) => JobMaterialService()),
+        Provider(create: (_) => JobService()),
+        Provider(create: (_) => EquipmentService()),
+        Provider(create: (_) => ClientService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context);
+    final userModel = Provider.of<UserModel>(context);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      restorationScopeId: 'app',
-      theme: ThemeData(),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
-
-      // Set the initial route based on authentication status
-      initialRoute: authViewModel.user != null ? '/' : '/login',
-
-      // Define named routes
+      title: 'Job Tracker',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      initialRoute: userModel.getIsLoggedIn ? '/' : '/login',
       routes: {
         '/': (context) => const HomeView(),
-        '/login': (context) => LoginView(),
-        '/signup': (context) => SignupView(),
+        '/login': (context) => const LoginView(),
+        '/signUp': (context) => const SignUpView(),
+        '/createUser': (context) => const CreateUserView(),
+        '/userList': (context) => const UserListView(),
       },
     );
   }

@@ -18,21 +18,17 @@ dependencies:
   provider: ^6.1.2 
   url_launcher: ^6.3.0
   intl: ^0.17.0
+  responsive_framework: ^0.1.0  # Added for responsive design
+  fluro: ^2.0.5  # Added for advanced routing
+  flutter_secure_storage: ^7.0.1  # Added for secure storage
 
-
-  flutter_gen: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  flutter_lints: ^4.0.0
+  flutter_lints: ^4.0.0  # Ensure linting is included
 
 flutter:
   uses-material-design: true
 
-  # Enable generation of localized Strings from arb files.
-  generate: true
-
   assets:
-    # Add assets from the images directory to the application.
     - assets/images/

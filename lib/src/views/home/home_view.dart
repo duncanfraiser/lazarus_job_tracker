@@ -1,50 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:lazarus_job_tracker/src/views/auth/user_list_view.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lazarus_job_tracker/src/views/job/job_list_view.dart';
+import 'package:lazarus_job_tracker/src/models/user_model.dart';
 import 'package:lazarus_job_tracker/src/services/auth_service.dart';
-import 'package:lazarus_job_tracker/src/views/auth/auth_view_model.dart';
+import 'package:lazarus_job_tracker/src/views/auth/user_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/equipment/equipment_list_view.dart';
+import 'package:lazarus_job_tracker/src/views/job/job_list_view.dart';
 import 'package:lazarus_job_tracker/src/views/job_material/job_material_list_view.dart';
-
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
-  Future<Map<String, String>> _getUserInfo(BuildContext context) async {
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-    final user = authViewModel.user;
+  Future<UserModel?> _getUserInfo(BuildContext context) async {
+    final userModel = Provider.of<UserModel>(context, listen: false);
+    final authService = AuthService();
 
-    if (user != null) {
-      final userDoc = await FirebaseFirestore.instance.collection('employees').doc(user.uid).get();
-      if (userDoc.exists) {
-        print("User data: ${userDoc.data()}"); // Debugging statement
-        return {
-          'companyName': userDoc.data()!['company'] ?? '',
-          'firstName': userDoc.data()!['firstName'] ?? '',
-          'lastName': userDoc.data()!['lastName'] ?? '',
-        };
-      } else {
-        print("No user document found");
-      }
-    } else {
-      print("User is null");
+    if (userModel.id.isNotEmpty) {
+      final user = await authService.getUserData(userModel.id);
+      return user;
     }
-    return {
-      'companyName': 'Dashboard',
-      'firstName': '',
-      'lastName': '',
-    };
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final AuthService auth = AuthService();
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-
-    return FutureBuilder<Map<String, String>>(
+    return FutureBuilder<UserModel?>(
       future: _getUserInfo(context),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -53,30 +33,28 @@ class HomeView extends StatelessWidget {
             body: const Center(child: CircularProgressIndicator()),
           );
         }
-
         if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(title: const Text('Error')),
             body: Center(child: Text('Error: ${snapshot.error}')),
           );
         }
-
-        final userInfo = snapshot.data!;
-        final companyName = userInfo['companyName'] ?? 'Dashboard';
-        final firstName = userInfo['firstName'] ?? '';
-        final lastName = userInfo['lastName'] ?? '';
-
-        print("Company Name: $companyName, First Name: $firstName, Last Name: $lastName"); // Debugging statement
-
+        if (!snapshot.hasData) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Home')),
+            body: const Center(child: Text('No user data found')),
+          );
+        }
+        final user = snapshot.data!;
         return Scaffold(
           appBar: AppBar(
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(companyName, style: const TextStyle(color: Colors.black), textAlign: TextAlign.center),
-                if (firstName.isNotEmpty && lastName.isNotEmpty)
+                Text(user.companyName, style: const TextStyle(color: Colors.black), textAlign: TextAlign.center),
+                if (user.firstName.isNotEmpty && user.lastName.isNotEmpty)
                   Text(
-                    '$firstName $lastName',
+                    '${user.firstName} ${user.lastName}',
                     style: const TextStyle(fontSize: 16, color: Colors.black),
                     textAlign: TextAlign.center,
                   ),
@@ -86,8 +64,8 @@ class HomeView extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.logout),
                 onPressed: () async {
-                  await auth.signOut();
-                  authViewModel.user = null;
+                  final authService = AuthService();
+                  await authService.signOut();
                   Navigator.pushReplacementNamed(context, '/login');
                 },
               ),
@@ -187,7 +165,7 @@ class HomeView extends StatelessWidget {
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
-                                child: Center(child: Text('Material', style: Theme.of(context).textTheme.titleLarge)),
+                                child: Center(child: Text('Materials', style: Theme.of(context).textTheme.titleLarge)),
                               ),
                             ),
                           ),

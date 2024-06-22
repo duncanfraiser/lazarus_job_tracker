@@ -1,39 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-class JobMaterialUsage {
-  final DateTime date;
-  final double quantity;
-
-  JobMaterialUsage({
-    required this.date,
-    required this.quantity,
-  });
-
-  factory JobMaterialUsage.fromJson(Map<String, dynamic> json) {
-    return JobMaterialUsage(
-      date: (json['date'] as Timestamp).toDate(),
-      quantity: json['quantity'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'date': date,
-      'quantity': quantity,
-    };
-  }
-}
+import 'package:intl/intl.dart'; // Import the intl package
+import 'package:lazarus_job_tracker/src/models/job_model.dart';
 
 class JobMaterialUsageDialog extends StatefulWidget {
   final String jobMaterialName;
   final List<JobMaterialUsage> usage;
 
-  const JobMaterialUsageDialog({super.key, 
-    required this.jobMaterialName,
-    required this.usage,
-  });
+  const JobMaterialUsageDialog({super.key, required this.jobMaterialName, required this.usage});
 
   @override
   _JobMaterialUsageDialogState createState() => _JobMaterialUsageDialogState();
@@ -41,7 +14,7 @@ class JobMaterialUsageDialog extends StatefulWidget {
 
 class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
   final List<JobMaterialUsage> _usage = [];
-  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
+  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd'); // Define the date format
 
   @override
   void initState() {
@@ -132,7 +105,7 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
             onPressed: () {
               if (dateController.text.isNotEmpty && quantityController.text.isNotEmpty) {
                 try {
-                  final date = _dateFormat.parse(dateController.text);
+                  final date = _dateFormat.parse(dateController.text); // Parse the date using the defined format
                   final quantity = double.parse(quantityController.text);
                   Navigator.of(context).pop(JobMaterialUsage(date: date, quantity: quantity));
                 } catch (e) {
