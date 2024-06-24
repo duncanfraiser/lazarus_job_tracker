@@ -4,6 +4,7 @@ import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 class EquipmentService {
   final CollectionReference equipmentCollection = FirebaseFirestore.instance.collection('equipment');
 
+  // Add Equipment
   Future<DocumentReference> addEquipment(EquipmentModel equipment) async {
     try {
       return await equipmentCollection.add(equipment.toJson());

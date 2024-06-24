@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lazarus_job_tracker/src/models/identifiable.dart';
 
-class JobModel {
+class JobModel implements Identifiable {
+  @override
   String? documentId;
   String name;
   String instructions;

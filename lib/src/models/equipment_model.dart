@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lazarus_job_tracker/src/models/identifiable.dart';
 
-class EquipmentModel {
+class EquipmentModel implements Identifiable {
+  @override
   String? documentId; // Firestore document ID
   String name;
   double ratePerHour;

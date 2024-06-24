@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 
 class JobMaterialUsageDialog extends StatefulWidget {

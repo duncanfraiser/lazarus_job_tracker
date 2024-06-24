@@ -139,6 +139,15 @@ Add your suggestion to the file below, maintain all of the functionality to make
 
 I've made the suggested changes above, tell me the file you would like to review for potential errors and I will provide that current file so you can add your suggestion and maintain all of the functionality to make sure your suggestions do not cause other errors through out the application.
 
+
+I would like to be able to add ~~~~~~~~~~ objects when creating and editing a job. I will provide the job_create_update_view.dart file, tell me the file you would like to review next to integrate the above functionality  and I will provide that current file so you can add your suggestion and maintain all of the functionality to make sure your suggestions does not cause other errors through out the application. Also make sure your suggestions use the best coding practices for a flutter application with Firebase B.A.A.S.
+
+Please search these websites so that you can assure that you are giving the proper suggestions and best code practices in your response
+https://pub.dev/
+https://firebase.google.com/docs
+https://dart.dev/
+https://docs.flutter.dev/
+
 ├── firebase_options.dart
 ├── main.dart
 └── src

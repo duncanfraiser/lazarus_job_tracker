@@ -3,6 +3,7 @@ import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
+import 'package:lazarus_job_tracker/src/models/identifiable.dart'; // Add this import
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
@@ -107,6 +108,68 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     }
   }
 
+  void _selectMultipleEquipments() async {
+    final selectedEquipments = await showDialog<List<String>>(
+      context: context,
+      builder: (context) {
+        return FutureBuilder<List<EquipmentModel>>(
+          future: _equipmentService.getAllEquipment(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const CircularProgressIndicator();
+            var equipments = snapshot.data!;
+            return MultiSelectDialog<EquipmentModel>(
+              items: equipments,
+              selectedValues: _selectedEquipmentIds,
+              itemBuilder: (context, item, isSelected) {
+                return ListTile(
+                  title: Text(item.name),
+                  trailing: isSelected ? const Icon(Icons.check) : null,
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+
+    if (selectedEquipments != null) {
+      setState(() {
+        _selectedEquipmentIds = selectedEquipments;
+      });
+    }
+  }
+
+  void _selectMultipleMaterials() async {
+    final selectedMaterials = await showDialog<List<String>>(
+      context: context,
+      builder: (context) {
+        return FutureBuilder<List<JobMaterialModel>>(
+          future: _jobMaterialService.getAllJobMaterials(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const CircularProgressIndicator();
+            var jobMaterials = snapshot.data!;
+            return MultiSelectDialog<JobMaterialModel>(
+              items: jobMaterials,
+              selectedValues: _selectedJobMaterialIds,
+              itemBuilder: (context, item, isSelected) {
+                return ListTile(
+                  title: Text(item.name),
+                  trailing: isSelected ? const Icon(Icons.check) : null,
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+
+    if (selectedMaterials != null) {
+      setState(() {
+        _selectedJobMaterialIds = selectedMaterials;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,7 +212,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
               StreamBuilder<List<ClientModel>>(
                 stream: _clientService.getClients(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  if (!snapshot.hasData) return const CircularProgressIndicator();
                   var clients = snapshot.data!;
                   return DropdownButtonFormField<String>(
                     value: _selectedClientId,
@@ -174,61 +237,13 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   );
                 },
               ),
-              StreamBuilder<List<EquipmentModel>>(
-                stream: _equipmentService.getEquipments(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return CircularProgressIndicator();
-                  var equipments = snapshot.data!;
-                  return DropdownButtonFormField<String>(
-                    value: _selectedEquipmentIds.isNotEmpty ? _selectedEquipmentIds.first : null,
-                    decoration: const InputDecoration(labelText: 'Equipment'),
-                    items: equipments.map((equipment) {
-                      return DropdownMenuItem<String>(
-                        value: equipment.documentId,
-                        child: Text(equipment.name), // Using name property for display
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedEquipmentIds = value != null ? [value] : [];
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select equipment';
-                      }
-                      return null;
-                    },
-                  );
-                },
+              ElevatedButton(
+                onPressed: _selectMultipleEquipments,
+                child: Text('Select Equipments (${_selectedEquipmentIds.length})'),
               ),
-              StreamBuilder<List<JobMaterialModel>>(
-                stream: _jobMaterialService.getJobMaterials(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return CircularProgressIndicator();
-                  var jobMaterials = snapshot.data!;
-                  return DropdownButtonFormField<String>(
-                    value: _selectedJobMaterialIds.isNotEmpty ? _selectedJobMaterialIds.first : null,
-                    decoration: const InputDecoration(labelText: 'Material'),
-                    items: jobMaterials.map((jobMaterial) {
-                      return DropdownMenuItem<String>(
-                        value: jobMaterial.documentId,
-                        child: Text(jobMaterial.name), // Using name property for display
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedJobMaterialIds = value != null ? [value] : [];
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select material';
-                      }
-                      return null;
-                    },
-                  );
-                },
+              ElevatedButton(
+                onPressed: _selectMultipleMaterials,
+                child: Text('Select Materials (${_selectedJobMaterialIds.length})'),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -238,6 +253,66 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class MultiSelectDialog<T extends Identifiable> extends StatefulWidget {
+  final List<T> items;
+  final List<String> selectedValues;
+  final Widget Function(BuildContext context, T item, bool isSelected) itemBuilder;
+
+  const MultiSelectDialog({super.key, 
+    required this.items,
+    required this.selectedValues,
+    required this.itemBuilder,
+  });
+
+  @override
+  _MultiSelectDialogState<T> createState() => _MultiSelectDialogState<T>();
+}
+
+class _MultiSelectDialogState<T extends Identifiable> extends State<MultiSelectDialog<T>> {
+  late List<String> _selectedValues;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedValues = List.from(widget.selectedValues);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: widget.items.length,
+              itemBuilder: (context, index) {
+                var item = widget.items[index];
+                var isSelected = item.documentId != null && _selectedValues.contains(item.documentId!);
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedValues.remove(item.documentId);
+                      } else {
+                        _selectedValues.add(item.documentId!);
+                      }
+                    });
+                  },
+                  child: widget.itemBuilder(context, item, isSelected),
+                );
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(_selectedValues),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }
