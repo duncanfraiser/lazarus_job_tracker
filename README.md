@@ -200,3 +200,8 @@ https://docs.flutter.dev/
     └── widgets
         ├── custom_text_field.dart
         └── emergency_contact_field.dart
+
+         Employee Model
+          JobModel
+           Service Class for Employees
+           JobCreateUpdateView

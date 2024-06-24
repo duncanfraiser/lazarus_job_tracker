@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:lazarus_job_tracker/src/models/clock_time_model.dart'; // Import ClockTime from the correct file
 
 class EmergencyContact {
   final String name;
@@ -23,7 +24,7 @@ class EmergencyContact {
 }
 
 class UserModel with ChangeNotifier {
-  String? documentId; // Add this property
+  String? documentId;
   String id;
   String firstName;
   String lastName;
@@ -33,10 +34,11 @@ class UserModel with ChangeNotifier {
   String phoneNumber;
   String address;
   List<EmergencyContact> emergencyContacts;
+  List<ClockTime> clockTimes; // Ensure it refers to ClockTime from the correct file
   bool isLoggedIn;
 
   UserModel({
-    this.documentId, // Add this property
+    this.documentId,
     required this.id,
     required this.firstName,
     required this.lastName,
@@ -46,14 +48,15 @@ class UserModel with ChangeNotifier {
     required this.phoneNumber,
     required this.address,
     required this.emergencyContacts,
+    required this.clockTimes,
     this.isLoggedIn = false,
   });
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return UserModel(
-      documentId: doc.id, // Set documentId
-      id: data['id'] ?? '', // Use data['id'] or provide a default value
+      documentId: doc.id,
+      id: data['id'] ?? '',
       firstName: data['firstName'],
       lastName: data['lastName'],
       email: data['email'],
@@ -64,13 +67,16 @@ class UserModel with ChangeNotifier {
       emergencyContacts: (data['emergencyContacts'] as List)
           .map((e) => EmergencyContact.fromMap(e))
           .toList(),
-      isLoggedIn: data['isLoggedIn'] ?? false, // Provide default value
+      clockTimes: (data['clockTimes'] as List)
+          .map((e) => ClockTime.fromMap(e))
+          .toList(),
+      isLoggedIn: data['isLoggedIn'] ?? false,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id, // Include the id property
+      'id': id,
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
@@ -79,6 +85,7 @@ class UserModel with ChangeNotifier {
       'phoneNumber': phoneNumber,
       'address': address,
       'emergencyContacts': emergencyContacts.map((e) => e.toMap()).toList(),
+      'clockTimes': clockTimes.map((e) => e.toJson()).toList(),
       'isLoggedIn': isLoggedIn,
     };
   }
@@ -124,6 +131,11 @@ class UserModel with ChangeNotifier {
     notifyListeners();
   }
 
+  set updateClockTimes(List<ClockTime> value) {
+    clockTimes = value;
+    notifyListeners();
+  }
+
   set updateIsLoggedIn(bool value) {
     isLoggedIn = value;
     notifyListeners();
@@ -139,5 +151,6 @@ class UserModel with ChangeNotifier {
   String get getPhoneNumber => phoneNumber;
   String get getAddress => address;
   List<EmergencyContact> get getEmergencyContacts => emergencyContacts;
+  List<ClockTime> get getClockTimes => clockTimes;
   bool get getIsLoggedIn => isLoggedIn;
 }

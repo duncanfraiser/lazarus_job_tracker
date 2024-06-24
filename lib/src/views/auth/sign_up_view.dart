@@ -19,6 +19,7 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -29,10 +30,11 @@ class _SignUpViewState extends State<SignUpView> {
     _passwordController.dispose();
     _companyController.dispose();
     _phoneController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
-  void _signUp(BuildContext context) async {
+  Future<void> _signUp(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -48,8 +50,9 @@ class _SignUpViewState extends State<SignUpView> {
           companyName: _companyController.text,
           userRole: 'user',
           phoneNumber: _phoneController.text,
-          address: '',
+          address: _addressController.text,
           emergencyContacts: [],
+          clockTimes: [], // Initialize with an empty list
           isLoggedIn: false,
         );
         await authService.signUp(_emailController.text, _passwordController.text, userModel);
@@ -152,6 +155,17 @@ class _SignUpViewState extends State<SignUpView> {
                   }
                   if (!RegExp(r'^\d{10}$').hasMatch(value)) {
                     return 'Please enter a valid phone number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(labelText: 'Address'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your address';
                   }
                   return null;
                 },

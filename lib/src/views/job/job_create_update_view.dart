@@ -3,14 +3,19 @@ import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
-import 'package:lazarus_job_tracker/src/models/identifiable.dart'; // Add this import
+import 'package:lazarus_job_tracker/src/models/identifiable.dart';
+import 'package:lazarus_job_tracker/src/models/user_model.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
+import 'package:lazarus_job_tracker/src/services/auth_service.dart';
+import 'package:lazarus_job_tracker/src/models/clock_time_model.dart';
+import 'package:intl/intl.dart';
+import 'package:lazarus_job_tracker/src/views/auth/employee_hours_dialog.dart';
 
 class JobCreateUpdateView extends StatefulWidget {
-  final JobModel? job; // If null, it means we're creating a new job
+  final JobModel? job;
 
   const JobCreateUpdateView({super.key, this.job});
 
@@ -24,12 +29,14 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
   final ClientService _clientService = ClientService();
   final EquipmentService _equipmentService = EquipmentService();
   final JobMaterialService _jobMaterialService = JobMaterialService();
+  final AuthService _authService = AuthService();
 
   late TextEditingController _nameController;
   late TextEditingController _instructionsController;
   String? _selectedClientId;
   List<String> _selectedEquipmentIds = [];
   List<String> _selectedJobMaterialIds = [];
+  Map<String, List<EmployeeHour>> _employeeHours = {};
 
   @override
   void initState() {
@@ -39,6 +46,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     _selectedClientId = widget.job?.clientId;
     _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
     _selectedJobMaterialIds = widget.job?.jobMaterialIds ?? [];
+    _employeeHours = widget.job?.employeeHours ?? {};
   }
 
   @override
@@ -48,7 +56,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     super.dispose();
   }
 
-  void _submitForm() async {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       try {
         final name = _nameController.text;
@@ -64,6 +72,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
           jobMaterialIds: _selectedJobMaterialIds,
           equipmentUsage: widget.job?.equipmentUsage ?? {},
           jobMaterialUsage: widget.job?.jobMaterialUsage ?? {},
+          employeeHours: _employeeHours,
         );
 
         if (widget.job == null) {
@@ -81,7 +90,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     }
   }
 
-  void _deleteJob() async {
+  Future<void> _deleteJob() async {
     if (widget.job != null) {
       bool? confirmDelete = await showDialog(
         context: context,
@@ -103,19 +112,19 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
 
       if (confirmDelete == true) {
         await _jobService.deleteJob(widget.job!.documentId!);
-        Navigator.pop(context); // Close the form after deletion
+        Navigator.pop(context);
       }
     }
   }
 
-  void _selectMultipleEquipments() async {
+  Future<void> _selectMultipleEquipments() async {
     final selectedEquipments = await showDialog<List<String>>(
       context: context,
       builder: (context) {
         return FutureBuilder<List<EquipmentModel>>(
           future: _equipmentService.getAllEquipment(),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return const CircularProgressIndicator();
+            if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
             var equipments = snapshot.data!;
             return MultiSelectDialog<EquipmentModel>(
               items: equipments,
@@ -139,14 +148,14 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     }
   }
 
-  void _selectMultipleMaterials() async {
+  Future<void> _selectMultipleMaterials() async {
     final selectedMaterials = await showDialog<List<String>>(
       context: context,
       builder: (context) {
         return FutureBuilder<List<JobMaterialModel>>(
           future: _jobMaterialService.getAllJobMaterials(),
           builder: (context, snapshot) {
-            if (!snapshot.hasData) return const CircularProgressIndicator();
+            if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
             var jobMaterials = snapshot.data!;
             return MultiSelectDialog<JobMaterialModel>(
               items: jobMaterials,
@@ -170,13 +179,45 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
     }
   }
 
+  void _addEmployeeHour(String employeeId) {
+    setState(() {
+      _employeeHours.putIfAbsent(employeeId, () => []);
+      _employeeHours[employeeId]!.add(EmployeeHour(date: DateTime.now(), hours: 0));
+    });
+  }
+
+  Future<void> _selectEmployeeHours() async {
+    final selectedEmployees = await showDialog<Map<String, List<EmployeeHour>>>(
+      context: context,
+      builder: (context) {
+        return FutureBuilder<List<UserModel>>(
+          future: _authService.getAllUsers(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+            var employees = snapshot.data!;
+            return EmployeeHoursDialog(
+              employees: employees,
+              initialSelectedHours: _employeeHours,
+            );
+          },
+        );
+      },
+    );
+
+    if (selectedEmployees != null) {
+      setState(() {
+        _employeeHours = selectedEmployees;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.job == null ? 'Create Job' : 'Update Job'),
         actions: [
-          if (widget.job != null) // Show delete button only for existing jobs
+          if (widget.job != null)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteJob,
@@ -212,7 +253,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
               StreamBuilder<List<ClientModel>>(
                 stream: _clientService.getClients(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return const CircularProgressIndicator();
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
                   var clients = snapshot.data!;
                   return DropdownButtonFormField<String>(
                     value: _selectedClientId,
@@ -220,7 +261,7 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                     items: clients.map((client) {
                       return DropdownMenuItem<String>(
                         value: client.documentId,
-                        child: Text(client.name), // Using name property for display
+                        child: Text(client.name),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -237,13 +278,20 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   );
                 },
               ),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _selectMultipleEquipments,
                 child: Text('Select Equipments (${_selectedEquipmentIds.length})'),
               ),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _selectMultipleMaterials,
                 child: Text('Select Materials (${_selectedJobMaterialIds.length})'),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _selectEmployeeHours,
+                child: Text('Select Employee Hours (${_employeeHours.length})'),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -263,7 +311,7 @@ class MultiSelectDialog<T extends Identifiable> extends StatefulWidget {
   final List<String> selectedValues;
   final Widget Function(BuildContext context, T item, bool isSelected) itemBuilder;
 
-  const MultiSelectDialog({super.key, 
+  const MultiSelectDialog({
     required this.items,
     required this.selectedValues,
     required this.itemBuilder,

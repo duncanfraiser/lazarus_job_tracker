@@ -18,6 +18,7 @@ class _CreateUserViewState extends State<CreateUserView> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -28,10 +29,11 @@ class _CreateUserViewState extends State<CreateUserView> {
     _passwordController.dispose();
     _companyController.dispose();
     _phoneController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
-  void _createUser(BuildContext context) async {
+  Future<void> _createUser(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -47,8 +49,9 @@ class _CreateUserViewState extends State<CreateUserView> {
           companyName: _companyController.text,
           userRole: 'user',
           phoneNumber: _phoneController.text,
-          address: '',
+          address: _addressController.text,
           emergencyContacts: [],
+          clockTimes: [], // Initialize with an empty list
           isLoggedIn: false,
         );
         await authService.createUser(userModel, _passwordController.text);
@@ -148,6 +151,17 @@ class _CreateUserViewState extends State<CreateUserView> {
                   }
                   if (!RegExp(r'^\d{10}$').hasMatch(value)) {
                     return 'Please enter a valid phone number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(labelText: 'Address'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the address';
                   }
                   return null;
                 },

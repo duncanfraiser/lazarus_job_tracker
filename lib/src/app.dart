@@ -30,6 +30,7 @@ void main() async {
           address: '',
           emergencyContacts: [],
           isLoggedIn: false,
+          clockTimes: [],
         )),
         Provider(create: (_) => JobMaterialService()),
         Provider(create: (_) => JobService()),

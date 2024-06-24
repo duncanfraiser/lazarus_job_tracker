@@ -22,13 +22,16 @@ class UserListView extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CreateUserView()),
-              ).then((value) => (context as Element).reassemble()); // Refresh list after returning
+              ).then((_) {
+                // Refresh list after returning
+                (context as Element).reassemble();
+              });
             },
           ),
         ],
       ),
-      body: FutureBuilder<List<UserModel>>(
-        future: authService.getAllUsers(),
+      body: StreamBuilder<List<UserModel>>(
+        stream: authService.getUsers(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -56,7 +59,10 @@ class UserListView extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => UserDetailView(user: user),
                         ),
-                      ).then((value) => (context as Element).reassemble()); // Refresh list after returning
+                      ).then((_) {
+                        // Refresh list after returning
+                        (context as Element).reassemble();
+                      });
                     },
                   ),
                 );

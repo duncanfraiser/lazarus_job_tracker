@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lazarus_job_tracker/src/models/identifiable.dart';
+import 'package:lazarus_job_tracker/src/models/clock_time_model.dart';
 
 class JobModel implements Identifiable {
   @override
@@ -11,6 +12,7 @@ class JobModel implements Identifiable {
   List<String> jobMaterialIds;
   Map<String, List<EquipmentUsage>> equipmentUsage;
   Map<String, List<JobMaterialUsage>> jobMaterialUsage;
+  Map<String, List<EmployeeHour>> employeeHours;
 
   JobModel({
     this.documentId,
@@ -21,6 +23,7 @@ class JobModel implements Identifiable {
     required this.jobMaterialIds,
     required this.equipmentUsage,
     required this.jobMaterialUsage,
+    required this.employeeHours,
   });
 
   factory JobModel.fromFirestore(DocumentSnapshot doc) {
@@ -37,8 +40,9 @@ class JobModel implements Identifiable {
         (key, value) => MapEntry(key as String, (value as List).map((e) => EquipmentUsage.fromMap(e as Map<String, dynamic>)).toList()),
       ),
       jobMaterialUsage: (data['jobMaterialUsage'] ?? {}).map<String, List<JobMaterialUsage>>(
-        (key, value) => MapEntry(key as String, (value as List).map((e) => JobMaterialUsage.fromMap(e as Map<String, dynamic>)).toList()),
-      ),
+        (key, value) => MapEntry(key as String, (value as List).map((e) => JobMaterialUsage.fromMap(e as Map<String, dynamic>)).toList())),
+      employeeHours: (data['employeeHours'] ?? {}).map<String, List<EmployeeHour>>(
+        (key, value) => MapEntry(key as String, (value as List).map((e) => EmployeeHour.fromMap(e as Map<String, dynamic>)).toList())),
     );
   }
 
@@ -51,6 +55,7 @@ class JobModel implements Identifiable {
       'jobMaterialIds': jobMaterialIds,
       'equipmentUsage': equipmentUsage.map((key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
       'jobMaterialUsage': jobMaterialUsage.map((key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
+      'employeeHours': employeeHours.map((key, value) => MapEntry(key, value.map((e) => e.toJson()).toList())),
     };
   }
 }
@@ -99,6 +104,30 @@ class JobMaterialUsage {
     return {
       'date': date,
       'quantity': quantity,
+    };
+  }
+}
+
+class EmployeeHour {
+  DateTime date;
+  double hours;
+
+  EmployeeHour({
+    required this.date,
+    required this.hours,
+  });
+
+  factory EmployeeHour.fromMap(Map<String, dynamic> data) {
+    return EmployeeHour(
+      date: (data['date'] as Timestamp).toDate(),
+      hours: data['hours'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date,
+      'hours': hours,
     };
   }
 }
