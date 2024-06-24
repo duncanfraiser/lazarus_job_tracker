@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:intl/intl.dart';
+import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 
 class JobMaterialUsageDialog extends StatefulWidget {
@@ -14,7 +15,7 @@ class JobMaterialUsageDialog extends StatefulWidget {
 
 class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
   final List<JobMaterialUsage> _usage = [];
-  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd'); // Define the date format
+  final DateFormat _dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
@@ -105,7 +106,7 @@ class _JobMaterialUsageDialogState extends State<JobMaterialUsageDialog> {
             onPressed: () {
               if (dateController.text.isNotEmpty && quantityController.text.isNotEmpty) {
                 try {
-                  final date = _dateFormat.parse(dateController.text); // Parse the date using the defined format
+                  final date = _dateFormat.parse(dateController.text);
                   final quantity = double.parse(quantityController.text);
                   Navigator.of(context).pop(JobMaterialUsage(date: date, quantity: quantity));
                 } catch (e) {

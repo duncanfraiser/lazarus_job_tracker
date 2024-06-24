@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
+import 'package:lazarus_job_tracker/src/models/client_model.dart';
+import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
+import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
@@ -23,27 +26,24 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
 
   late TextEditingController _nameController;
   late TextEditingController _instructionsController;
-  late TextEditingController _clientIdController;
-  late TextEditingController _equipmentIdsController;
-  late TextEditingController _jobMaterialIdsController;
+  String? _selectedClientId;
+  List<String> _selectedEquipmentIds = [];
+  List<String> _selectedJobMaterialIds = [];
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.job?.name ?? '');
     _instructionsController = TextEditingController(text: widget.job?.instructions ?? '');
-    _clientIdController = TextEditingController(text: widget.job?.clientId ?? '');
-    _equipmentIdsController = TextEditingController(text: widget.job?.equipmentIds.join(', ') ?? '');
-    _jobMaterialIdsController = TextEditingController(text: widget.job?.jobMaterialIds.join(', ') ?? '');
+    _selectedClientId = widget.job?.clientId;
+    _selectedEquipmentIds = widget.job?.equipmentIds ?? [];
+    _selectedJobMaterialIds = widget.job?.jobMaterialIds ?? [];
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _instructionsController.dispose();
-    _clientIdController.dispose();
-    _equipmentIdsController.dispose();
-    _jobMaterialIdsController.dispose();
     super.dispose();
   }
 
@@ -52,17 +52,15 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
       try {
         final name = _nameController.text;
         final instructions = _instructionsController.text;
-        final clientId = _clientIdController.text;
-        final equipmentIds = _equipmentIdsController.text.split(', ').toList();
-        final jobMaterialIds = _jobMaterialIdsController.text.split(', ').toList();
+        final clientId = _selectedClientId;
 
         final job = JobModel(
           documentId: widget.job?.documentId,
           name: name,
           instructions: instructions,
-          clientId: clientId,
-          equipmentIds: equipmentIds,
-          jobMaterialIds: jobMaterialIds,
+          clientId: clientId!,
+          equipmentIds: _selectedEquipmentIds,
+          jobMaterialIds: _selectedJobMaterialIds,
           equipmentUsage: widget.job?.equipmentUsage ?? {},
           jobMaterialUsage: widget.job?.jobMaterialUsage ?? {},
         );
@@ -148,34 +146,88 @@ class _JobCreateUpdateViewState extends State<JobCreateUpdateView> {
                   return null;
                 },
               ),
-              TextFormField(
-                controller: _clientIdController,
-                decoration: const InputDecoration(labelText: 'Client ID'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a client ID';
-                  }
-                  return null;
+              StreamBuilder<List<ClientModel>>(
+                stream: _clientService.getClients(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  var clients = snapshot.data!;
+                  return DropdownButtonFormField<String>(
+                    value: _selectedClientId,
+                    decoration: const InputDecoration(labelText: 'Client'),
+                    items: clients.map((client) {
+                      return DropdownMenuItem<String>(
+                        value: client.documentId,
+                        child: Text(client.name), // Using name property for display
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedClientId = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a client';
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
-              TextFormField(
-                controller: _equipmentIdsController,
-                decoration: const InputDecoration(labelText: 'Equipment IDs (comma separated)'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter equipment IDs';
-                  }
-                  return null;
+              StreamBuilder<List<EquipmentModel>>(
+                stream: _equipmentService.getEquipments(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  var equipments = snapshot.data!;
+                  return DropdownButtonFormField<String>(
+                    value: _selectedEquipmentIds.isNotEmpty ? _selectedEquipmentIds.first : null,
+                    decoration: const InputDecoration(labelText: 'Equipment'),
+                    items: equipments.map((equipment) {
+                      return DropdownMenuItem<String>(
+                        value: equipment.documentId,
+                        child: Text(equipment.name), // Using name property for display
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedEquipmentIds = value != null ? [value] : [];
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select equipment';
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
-              TextFormField(
-                controller: _jobMaterialIdsController,
-                decoration: const InputDecoration(labelText: 'Material IDs (comma separated)'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter material IDs';
-                  }
-                  return null;
+              StreamBuilder<List<JobMaterialModel>>(
+                stream: _jobMaterialService.getJobMaterials(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  var jobMaterials = snapshot.data!;
+                  return DropdownButtonFormField<String>(
+                    value: _selectedJobMaterialIds.isNotEmpty ? _selectedJobMaterialIds.first : null,
+                    decoration: const InputDecoration(labelText: 'Material'),
+                    items: jobMaterials.map((jobMaterial) {
+                      return DropdownMenuItem<String>(
+                        value: jobMaterial.documentId,
+                        child: Text(jobMaterial.name), // Using name property for display
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedJobMaterialIds = value != null ? [value] : [];
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select material';
+                      }
+                      return null;
+                    },
+                  );
                 },
               ),
               const SizedBox(height: 20),

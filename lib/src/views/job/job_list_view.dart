@@ -40,38 +40,40 @@ class JobListView extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No jobs found'));
+          } else {
+            final jobs = snapshot.data!;
+            return ListView.builder(
+              itemCount: jobs.length,
+              itemBuilder: (context, index) {
+                final job = jobs[index];
+                return Card(
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      job.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(job.instructions),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => JobDetailView(job: job),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            );
           }
-
-          final jobs = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: jobs.length,
-            itemBuilder: (context, index) {
-              final job = jobs[index];
-              return Card(
-                elevation: 4.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: ListTile(
-                  title: Text(job.name),
-                  subtitle: Text(job.instructions),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => JobDetailView(job: job),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
         },
       ),
     );

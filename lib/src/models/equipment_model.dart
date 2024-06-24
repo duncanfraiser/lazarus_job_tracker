@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EquipmentModel {
-  String? documentId; // firestore document ID
+  String? documentId; // Firestore document ID
   String name;
   double ratePerHour;
   String description;
@@ -21,7 +21,7 @@ class EquipmentModel {
     return EquipmentModel(
       documentId: id,
       name: json['name'],
-      ratePerHour: json['ratePerHour'],
+      ratePerHour: (json['ratePerHour'] as num).toDouble(), // Ensures ratePerHour is converted to double
       description: json['description'],
       // Initialize other properties
     );

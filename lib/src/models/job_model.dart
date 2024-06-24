@@ -22,7 +22,7 @@ class JobModel {
   });
 
   factory JobModel.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
     return JobModel(
       documentId: doc.id,
@@ -32,10 +32,10 @@ class JobModel {
       equipmentIds: List<String>.from(data['equipmentIds'] ?? []),
       jobMaterialIds: List<String>.from(data['jobMaterialIds'] ?? []),
       equipmentUsage: (data['equipmentUsage'] ?? {}).map<String, List<EquipmentUsage>>(
-        (key, value) => MapEntry(key, (value as List).map((e) => EquipmentUsage.fromMap(e)).toList()),
+        (key, value) => MapEntry(key as String, (value as List).map((e) => EquipmentUsage.fromMap(e as Map<String, dynamic>)).toList()),
       ),
       jobMaterialUsage: (data['jobMaterialUsage'] ?? {}).map<String, List<JobMaterialUsage>>(
-        (key, value) => MapEntry(key, (value as List).map((e) => JobMaterialUsage.fromMap(e)).toList()),
+        (key, value) => MapEntry(key as String, (value as List).map((e) => JobMaterialUsage.fromMap(e as Map<String, dynamic>)).toList()),
       ),
     );
   }

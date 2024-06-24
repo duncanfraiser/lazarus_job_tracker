@@ -31,8 +31,8 @@ class _EquipmentListViewState extends State<EquipmentListView> {
           ),
         ],
       ),
-      body: FutureBuilder<List<EquipmentModel>>(
-        future: _equipmentService.getAllEquipment(),
+      body: StreamBuilder<List<EquipmentModel>>(
+        stream: _equipmentService.getEquipments(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

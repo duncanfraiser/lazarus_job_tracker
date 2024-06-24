@@ -3,7 +3,7 @@ import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
-import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/job_service.dart';

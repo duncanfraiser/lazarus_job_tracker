@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class JobMaterialModel {
-  String? documentId; // firestore document ID
+  String? documentId; // Firestore document ID
   String name;
   double price;
   String description;
@@ -21,7 +21,7 @@ class JobMaterialModel {
     return JobMaterialModel(
       documentId: id,
       name: json['name'],
-      price: json['price'],
+      price: (json['price'] as num).toDouble(), // Ensures price is converted to double
       description: json['description'],
       // Initialize other properties
     );
@@ -41,4 +41,7 @@ class JobMaterialModel {
   factory JobMaterialModel.fromDocument(DocumentSnapshot doc) {
     return JobMaterialModel.fromJson(doc.data() as Map<String, dynamic>, doc.id);
   }
+
+  // Getter for id
+  String get id => documentId ?? '';
 }

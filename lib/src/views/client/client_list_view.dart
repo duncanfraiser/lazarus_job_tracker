@@ -31,8 +31,8 @@ class _ClientListViewState extends State<ClientListView> {
           ),
         ],
       ),
-      body: FutureBuilder<List<ClientModel>>(
-        future: _clientService.getAllClient(),
+      body: StreamBuilder<List<ClientModel>>(
+        stream: _clientService.getClients(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

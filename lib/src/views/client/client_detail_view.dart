@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/views/client/client_create_update_view.dart';
+import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:provider/provider.dart';
 
 class ClientDetailView extends StatelessWidget {
   final ClientModel client;
@@ -9,9 +11,51 @@ class ClientDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final clientService = Provider.of<ClientService>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('${client.fName} ${client.lName}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ClientCreateUpdateView(client: client),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () async {
+              final confirmDelete = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Delete Client'),
+                  content: const Text('Are you sure you want to delete this client?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Delete'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmDelete == true) {
+                await clientService.deleteClient(client.documentId!);
+                Navigator.pop(context); // Close the detail view after deletion
+              }
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -25,7 +25,14 @@ class EquipmentService {
     }
   }
 
-  // Get All Equipment
+  // Get All Equipment as a Stream
+  Stream<List<EquipmentModel>> getEquipments() {
+    return equipmentCollection.snapshots().map((snapshot) =>
+      snapshot.docs.map((doc) => EquipmentModel.fromDocument(doc)).toList()
+    );
+  }
+
+  // Get All Equipment as a Future
   Future<List<EquipmentModel>> getAllEquipment() async {
     try {
       QuerySnapshot querySnapshot = await equipmentCollection.get();
@@ -33,11 +40,6 @@ class EquipmentService {
     } catch (e) {
       throw Exception('Error getting all equipment: $e');
     }
-  }
-
-  Stream<List<EquipmentModel>> getEquipments() {
-    return equipmentCollection.snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => EquipmentModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
 
   // Update Equipment

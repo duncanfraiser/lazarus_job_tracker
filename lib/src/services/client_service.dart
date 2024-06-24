@@ -6,14 +6,12 @@ class ClientService {
 
   // Add Client  
   Future<DocumentReference> addClient(ClientModel client) async {
-       try {
-    return await clientCollection.add(client.toJson());
-        } catch (e) {
+    try {
+      return await clientCollection.add(client.toJson());
+    } catch (e) {
       throw Exception('Error adding client: $e');
     }
   }
-
-
 
   // Get Client by ID
   Future<ClientModel?> getClientById(String id) async {
@@ -28,13 +26,20 @@ class ClientService {
     }
   }
 
-  // Get All Client
-  Future<List<ClientModel>> getAllClient() async {
+  // Get All Clients as a Stream
+  Stream<List<ClientModel>> getClients() {
+    return clientCollection.snapshots().map((snapshot) =>
+      snapshot.docs.map((doc) => ClientModel.fromDocument(doc)).toList()
+    );
+  }
+
+  // Get All Clients as a Future
+  Future<List<ClientModel>> getAllClients() async {
     try {
       QuerySnapshot querySnapshot = await clientCollection.get();
       return querySnapshot.docs.map((doc) => ClientModel.fromDocument(doc)).toList();
     } catch (e) {
-      throw Exception('Error getting all Client: $e');
+      throw Exception('Error getting all clients: $e');
     }
   }
 
@@ -51,18 +56,12 @@ class ClientService {
     }
   }
 
-  // Delete Equipment
+  // Delete Client
   Future<void> deleteClient(String id) async {
     try {
       await clientCollection.doc(id).delete();
     } catch (e) {
       throw Exception('Error deleting client: $e');
     }
-  }
-
-    Stream<List<ClientModel>> getClients() {
-    return clientCollection.snapshots().map((snapshot) =>
-      snapshot.docs.map((doc) => ClientModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList()
-    );
   }
 }

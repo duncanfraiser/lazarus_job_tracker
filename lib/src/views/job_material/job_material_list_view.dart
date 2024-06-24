@@ -31,8 +31,8 @@ class _JobMaterialListViewState extends State<JobMaterialListView> {
           ),
         ],
       ),
-      body: FutureBuilder<List<JobMaterialModel>>(
-        future: _jobMaterialService.getJobAllMaterial(),
+      body: StreamBuilder<List<JobMaterialModel>>(
+        stream: _jobMaterialService.getJobMaterials(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -69,7 +69,7 @@ class _JobMaterialListViewState extends State<JobMaterialListView> {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text('Delete Material'),
-                          content: const Text('Are you sure you want to delete this Material?'),
+                          content: const Text('Are you sure you want to delete this material?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(false),

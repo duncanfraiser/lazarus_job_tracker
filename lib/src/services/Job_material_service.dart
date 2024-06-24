@@ -4,14 +4,13 @@ import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
 class JobMaterialService {
   final CollectionReference _jobMaterialCollection = FirebaseFirestore.instance.collection('material');
 
-  Future<DocumentReference> addJobMaterial(JobMaterialModel material) {
-      try {
-      return _jobMaterialCollection.add(material.toJson());
+  Future<DocumentReference> addJobMaterial(JobMaterialModel material) async {
+    try {
+      return await _jobMaterialCollection.add(material.toJson());
     } catch (e) {
       throw Exception('Error adding material: $e');
     }
   }
-
 
   // Get Material by ID
   Future<JobMaterialModel?> getJobMaterialById(String id) async {
@@ -26,13 +25,20 @@ class JobMaterialService {
     }
   }
 
-  // Get All Material
-  Future<List<JobMaterialModel>> getJobAllMaterial() async {
+  // Get All Materials as a Stream
+  Stream<List<JobMaterialModel>> getJobMaterials() {
+    return _jobMaterialCollection.snapshots().map((snapshot) =>
+      snapshot.docs.map((doc) => JobMaterialModel.fromDocument(doc)).toList()
+    );
+  }
+
+  // Get All Materials as a Future
+  Future<List<JobMaterialModel>> getAllJobMaterials() async {
     try {
       QuerySnapshot querySnapshot = await _jobMaterialCollection.get();
       return querySnapshot.docs.map((doc) => JobMaterialModel.fromDocument(doc)).toList();
     } catch (e) {
-      throw Exception('Error getting all Material: $e');
+      throw Exception('Error getting all materials: $e');
     }
   }
 
@@ -42,25 +48,19 @@ class JobMaterialService {
       if (material.documentId != null) {
         await _jobMaterialCollection.doc(material.documentId).update(material.toJson());
       } else {
-        throw Exception('Error updating Material: Document ID is null');
+        throw Exception('Error updating material: Document ID is null');
       }
     } catch (e) {
-      throw Exception('Error updating Material: $e');
+      throw Exception('Error updating material: $e');
     }
   }
 
-  Stream<List<JobMaterialModel>> getJobMaterials() {
-    return _jobMaterialCollection.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => JobMaterialModel.fromDocument(doc)).toList();
-    });
-  }
-  
   // Delete Material
   Future<void> deleteJobMaterial(String id) async {
     try {
       await _jobMaterialCollection.doc(id).delete();
     } catch (e) {
-      throw Exception('Error deleting Material: $e');
+      throw Exception('Error deleting material: $e');
     }
   }
 }

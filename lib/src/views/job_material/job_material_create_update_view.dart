@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_material_model.dart';
-import 'package:lazarus_job_tracker/src/services/Job_material_service.dart';
+import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
 
 class JobMaterialCreateUpdateView extends StatefulWidget {
   final JobMaterialModel? jobMaterial; // If null, it means we're creating a new Material
