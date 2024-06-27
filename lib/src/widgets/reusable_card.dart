@@ -6,6 +6,7 @@ class ReusableCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final Widget? child;
+  final Widget? trailing; // Added trailing parameter
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final Color? backgroundColor;
@@ -20,6 +21,7 @@ class ReusableCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.child,
+    this.trailing, // Added trailing parameter
     this.onTap,
     this.onLongPress,
     this.backgroundColor,
@@ -47,6 +49,7 @@ class ReusableCard extends StatelessWidget {
               leading: Icon(icon, color: Colors.white, size: iconSize ?? AppStyles.cardIconSize),
               title: Text(title, style: titleStyle ?? AppStyles.cardTitleStyle),
               subtitle: child ?? Text(subtitle, style: subtitleStyle ?? AppStyles.cardSubtitleStyle),
+              trailing: trailing, // Added trailing parameter
               onTap: onTap,
               onLongPress: onLongPress,
             ),
