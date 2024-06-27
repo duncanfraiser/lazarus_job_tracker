@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/equipment_model.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
+import 'package:lazarus_job_tracker/src/app_styles.dart';
+import 'package:lazarus_job_tracker/src/widgets/no_data_view.dart';
+import 'package:provider/provider.dart';
+import 'package:lazarus_job_tracker/src/services/auth_service.dart';
+import 'package:lazarus_job_tracker/src/models/user_model.dart';
+import 'package:lazarus_job_tracker/src/widgets/loading_view.dart';
+import 'package:lazarus_job_tracker/src/widgets/error_view.dart';
+import 'package:lazarus_job_tracker/src/widgets/top_bar.dart';
+import 'package:lazarus_job_tracker/src/widgets/bottom_bar.dart';
+import 'package:lazarus_job_tracker/src/widgets/reusable_form_card.dart';
 
 class EquipmentCreateUpdateView extends StatefulWidget {
-  final EquipmentModel? equipment; // If null, it means we're creating a new equipment
+  final EquipmentModel? equipment;
 
   const EquipmentCreateUpdateView({super.key, this.equipment});
 
@@ -95,68 +105,113 @@ class _EquipmentCreateUpdateViewState extends State<EquipmentCreateUpdateView> {
     }
   }
 
+  void _navigateHome() {
+    Navigator.popUntil(context, ModalRoute.withName('/'));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.equipment == null ? 'Create Equipment' : 'Update Equipment'),
-        actions: [
-          if (widget.equipment != null) // Show delete button only for existing equipment
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: _deleteEquipment,
-            ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a name';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _ratePerHourController,
-                decoration: const InputDecoration(labelText: 'Rate per Hour'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a rate per hour';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    return FutureBuilder<UserModel?>(
+      future: authService.getUserData(authService.currentUser!.uid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const LoadingView(title: 'Loading...');
+        }
+
+        if (snapshot.hasError) {
+          return ErrorView(title: 'Error', errorMessage: snapshot.error.toString());
+        }
+
+        if (!snapshot.hasData) {
+          return const NoDataView(title: 'Home', message: 'No user data found');
+        }
+
+        final user = snapshot.data!;
+
+        return Scaffold(
+          appBar: TopBar(
+            companyName: user.companyName,
+            userName: '${user.firstName} ${user.lastName}',
+            actions: [
+              IconButton(
+                icon: Icon(Icons.check, color: AppStyles.greenCheckIcon.color, size: AppStyles.greenCheckIcon.size),
                 onPressed: _submitForm,
-                child: Text(widget.equipment == null ? 'Create' : 'Update'),
+                iconSize: AppStyles.topBarIconSize,
               ),
+              if (widget.equipment != null) // Show delete button only for existing equipment
+                IconButton(
+                  icon: Icon(Icons.delete, color: AppStyles.redDeleteIcon.color, size: AppStyles.redDeleteIcon.size),
+                  onPressed: _deleteEquipment,
+                  iconSize: AppStyles.topBarIconSize,
+                ),
             ],
           ),
-        ),
-      ),
+          backgroundColor: AppStyles.backgroundColor,
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: <Widget>[
+                  Text(
+                    widget.equipment == null ? 'Create Equipment' : 'Update Equipment',
+                    style: AppStyles.headlineStyle,
+                    textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 16.0),
+                  ReusableFormCard(
+                    icon: Icons.build,
+                    title: 'Name',
+                    controller: _nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a name';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.text, // Added keyboardType
+                  ),
+                  const SizedBox(height: 8.0), // Adjust spacing between cards
+                  ReusableFormCard(
+                    icon: Icons.attach_money,
+                    title: 'Rate per Hour',
+                    controller: _ratePerHourController,
+                    keyboardType: TextInputType.number, // Added keyboardType
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a rate per hour';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8.0), // Adjust spacing between cards
+                  ReusableFormCard(
+                    icon: Icons.description,
+                    title: 'Description',
+                    controller: _descriptionController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a description';
+                      }
+                      return null;
+                    },
+                    keyboardType: TextInputType.text, // Added keyboardType
+                  ),
+                ],
+              ),
+            ),
+          ),
+          bottomNavigationBar: BottomBar(
+            onHomePressed: _navigateHome,
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        );
+      },
     );
   }
 }

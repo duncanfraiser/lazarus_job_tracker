@@ -4,7 +4,7 @@ import 'package:lazarus_job_tracker/src/app_styles.dart';
 class BottomBar extends StatelessWidget {
   final VoidCallback onHomePressed;
 
-  const BottomBar({required this.onHomePressed, Key? key}) : super(key: key);
+  const BottomBar({required this.onHomePressed, super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -132,15 +132,10 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
               key: _formKey,
               child: ListView(
                 children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        widget.client == null ? 'Create Client' : 'Update Client',
-                        style: AppStyles.headlineStyle, // Using the original color
-                        textAlign: TextAlign.right,
-                      ),
-                    ],
+                  Text(
+                    widget.client == null ? 'Create Client' : 'Update Client',
+                    style: AppStyles.headlineStyle, // Using the original color
+                    textAlign: TextAlign.left,
                   ),
                   const SizedBox(height: 16.0),
                   ReusableFormCard(
@@ -153,6 +148,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.text, // Added keyboardType
                   ),
                   const SizedBox(height: 8.0), // Adjust spacing between cards
                   ReusableFormCard(
@@ -165,6 +161,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.text, // Added keyboardType
                   ),
                   const SizedBox(height: 8.0), // Adjust spacing between cards
                   ReusableFormCard(
@@ -177,6 +174,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.text, // Added keyboardType
                   ),
                   const SizedBox(height: 8.0), // Adjust spacing between cards
                   ReusableFormCard(
@@ -189,6 +187,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.phone, // Added keyboardType
                   ),
                   const SizedBox(height: 8.0), // Adjust spacing between cards
                   ReusableFormCard(
@@ -201,6 +200,7 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
                       }
                       return null;
                     },
+                    keyboardType: TextInputType.emailAddress, // Added keyboardType
                   ),
                 ],
               ),

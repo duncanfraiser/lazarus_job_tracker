@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lazarus_job_tracker/src/services/auth_service.dart';
 import 'package:lazarus_job_tracker/src/models/user_model.dart';
+import 'package:lazarus_job_tracker/src/app_styles.dart';
 
 class CreateUserView extends StatefulWidget {
   const CreateUserView({super.key});
@@ -80,6 +81,12 @@ class _CreateUserViewState extends State<CreateUserView> {
           key: _formKey,
           child: ListView(
             children: <Widget>[
+              Text(
+                'Create User',
+                style: AppStyles.headlineStyle,
+                textAlign: TextAlign.left,
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _firstNameController,
                 decoration: const InputDecoration(labelText: 'First Name'),

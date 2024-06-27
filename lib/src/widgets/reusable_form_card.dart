@@ -7,6 +7,7 @@ class ReusableFormCard extends StatelessWidget {
   final TextEditingController controller;
   final String? Function(String?) validator;
   final String? hintText;
+  final TextInputType keyboardType; // Added this parameter
 
   const ReusableFormCard({
     super.key,
@@ -14,6 +15,7 @@ class ReusableFormCard extends StatelessWidget {
     required this.title,
     required this.controller,
     required this.validator,
+    required this.keyboardType, // Added this parameter
     this.hintText,
   });
 
@@ -35,6 +37,7 @@ class ReusableFormCard extends StatelessWidget {
                 child: TextFormField(
                   controller: controller,
                   validator: validator,
+                  keyboardType: keyboardType, // Added this parameter
                   style: AppStyles.cardSubtitleStyle.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
                     labelText: title,
