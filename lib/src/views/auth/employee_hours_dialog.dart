@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/job_model.dart';
 import 'package:lazarus_job_tracker/src/models/user_model.dart';
-import 'package:lazarus_job_tracker/src/models/clock_time_model.dart';
 import 'package:intl/intl.dart';
 
 class EmployeeHoursDialog extends StatefulWidget {
@@ -11,8 +10,8 @@ class EmployeeHoursDialog extends StatefulWidget {
   const EmployeeHoursDialog({
     required this.employees,
     required this.initialSelectedHours,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _EmployeeHoursDialogState createState() => _EmployeeHoursDialogState();

@@ -13,6 +13,7 @@ class ClientService {
     }
   }
 
+
   // Get Client by ID
   Future<ClientModel?> getClientById(String id) async {
     try {

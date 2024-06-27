@@ -1,9 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lazarus_job_tracker/src/models/client_model.dart';
 import 'package:lazarus_job_tracker/src/services/client_service.dart';
+import 'package:lazarus_job_tracker/src/app_styles.dart';
+import 'package:lazarus_job_tracker/src/widgets/no_data_view.dart';
+import 'package:provider/provider.dart';
+import 'package:lazarus_job_tracker/src/services/auth_service.dart';
+import 'package:lazarus_job_tracker/src/models/user_model.dart';
+import 'package:lazarus_job_tracker/src/widgets/loading_view.dart';
+import 'package:lazarus_job_tracker/src/widgets/error_view.dart';
+import 'package:lazarus_job_tracker/src/widgets/top_bar.dart';
+import 'package:lazarus_job_tracker/src/widgets/bottom_bar.dart';
+import 'package:lazarus_job_tracker/src/widgets/reusable_form_card.dart';
 
 class ClientCreateUpdateView extends StatefulWidget {
-  final ClientModel? client; // If null, it means we're creating a new client
+  final ClientModel? client;
 
   const ClientCreateUpdateView({super.key, this.client});
 
@@ -51,7 +61,6 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
         final email = _emailController.text;
 
         if (widget.client == null) {
-          // Create new client
           await _clientService.addClient(ClientModel(
             fName: fName,
             lName: lName,
@@ -60,7 +69,6 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
             email: email,
           ));
         } else {
-          // Update existing client
           await _clientService.updateClient(ClientModel(
             documentId: widget.client!.documentId,
             fName: fName,
@@ -80,111 +88,130 @@ class _ClientCreateUpdateViewState extends State<ClientCreateUpdateView> {
     }
   }
 
-  void _deleteClient() async {
-    if (widget.client != null && widget.client!.documentId != null) {
-      bool? confirmDelete = await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Delete Client'),
-          content: const Text('Are you sure you want to delete this client?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
-      );
-
-      if (confirmDelete == true) {
-        await _clientService.deleteClient(widget.client!.documentId!);
-        Navigator.pop(context); // Close the form after deletion
-      }
-    }
+  void _navigateHome() {
+    Navigator.popUntil(context, ModalRoute.withName('/'));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.client == null ? 'Create Client' : 'Update Client'),
-        actions: [
-          if (widget.client != null) // Show delete button only for existing clients
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: _deleteClient,
-            ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              TextFormField(
-                controller: _fNameController,
-                decoration: const InputDecoration(labelText: 'First Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a first name';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _lNameController,
-                decoration: const InputDecoration(labelText: 'Last Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a last name';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _billingAddressController,
-                decoration: const InputDecoration(labelText: 'Billing Address'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a billing address';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a phone number';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an email';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    return FutureBuilder<UserModel?>(
+      future: authService.getUserData(authService.currentUser!.uid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const LoadingView(title: 'Loading...');
+        }
+
+        if (snapshot.hasError) {
+          return ErrorView(title: 'Error', errorMessage: snapshot.error.toString());
+        }
+
+        if (!snapshot.hasData) {
+          return const NoDataView(title: 'Home', message: 'No user data found');
+        }
+
+        final user = snapshot.data!;
+
+        return Scaffold(
+          appBar: TopBar(
+            companyName: user.companyName,
+            userName: '${user.firstName} ${user.lastName}',
+            actions: [
+              IconButton(
+                icon: Icon(Icons.check, color: AppStyles.greenCheckIcon.color, size: AppStyles.greenCheckIcon.size),
                 onPressed: _submitForm,
-                child: Text(widget.client == null ? 'Create' : 'Update'),
+                iconSize: AppStyles.topBarIconSize,
               ),
             ],
           ),
-        ),
-      ),
+          backgroundColor: AppStyles.backgroundColor,
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        widget.client == null ? 'Create Client' : 'Update Client',
+                        style: AppStyles.headlineStyle, // Using the original color
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0),
+                  ReusableFormCard(
+                    icon: Icons.person,
+                    title: 'First Name',
+                    controller: _fNameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a first name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8.0), // Adjust spacing between cards
+                  ReusableFormCard(
+                    icon: Icons.person,
+                    title: 'Last Name',
+                    controller: _lNameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a last name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8.0), // Adjust spacing between cards
+                  ReusableFormCard(
+                    icon: Icons.home,
+                    title: 'Billing Address',
+                    controller: _billingAddressController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a billing address';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8.0), // Adjust spacing between cards
+                  ReusableFormCard(
+                    icon: Icons.phone,
+                    title: 'Phone',
+                    controller: _phoneController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a phone number';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8.0), // Adjust spacing between cards
+                  ReusableFormCard(
+                    icon: Icons.email,
+                    title: 'Email',
+                    controller: _emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter an email';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          bottomNavigationBar: BottomBar(
+            onHomePressed: _navigateHome,
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        );
+      },
     );
   }
 }

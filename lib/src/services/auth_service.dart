@@ -8,6 +8,22 @@ class AuthService {
 
   User? get currentUser => _auth.currentUser;
 
+  Future<UserModel?> getCurrentUserModel() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot doc = await _firestore.collection('employees').doc(user.uid).get();
+        if (doc.exists) {
+          return UserModel.fromDocument(doc);
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error getting current user data: $e');
+      rethrow;
+    }
+  }
+
   Future<User?> signUp(String email, String password, UserModel userModel) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);

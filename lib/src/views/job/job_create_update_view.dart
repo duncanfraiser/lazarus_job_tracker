@@ -10,8 +10,6 @@ import 'package:lazarus_job_tracker/src/services/client_service.dart';
 import 'package:lazarus_job_tracker/src/services/equipment_service.dart';
 import 'package:lazarus_job_tracker/src/services/job_material_service.dart';
 import 'package:lazarus_job_tracker/src/services/auth_service.dart';
-import 'package:lazarus_job_tracker/src/models/clock_time_model.dart';
-import 'package:intl/intl.dart';
 import 'package:lazarus_job_tracker/src/views/auth/employee_hours_dialog.dart';
 
 class JobCreateUpdateView extends StatefulWidget {
@@ -311,7 +309,7 @@ class MultiSelectDialog<T extends Identifiable> extends StatefulWidget {
   final List<String> selectedValues;
   final Widget Function(BuildContext context, T item, bool isSelected) itemBuilder;
 
-  const MultiSelectDialog({
+  const MultiSelectDialog({super.key, 
     required this.items,
     required this.selectedValues,
     required this.itemBuilder,

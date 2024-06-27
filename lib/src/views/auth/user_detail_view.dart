@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lazarus_job_tracker/src/app_styles.dart';
 import 'package:lazarus_job_tracker/src/models/user_model.dart';
 import 'package:lazarus_job_tracker/src/services/auth_service.dart';
 import 'package:lazarus_job_tracker/src/views/auth/create_user_view.dart';
@@ -18,7 +19,7 @@ class UserDetailView extends StatelessWidget {
         title: Text('${user.firstName} ${user.lastName}'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
+            icon: Icon(Icons.delete, color: AppStyles.redDeleteIcon.color, size: AppStyles.redDeleteIcon.size),
             onPressed: () async {
               bool? confirmDelete = await showDialog(
                 context: context,
